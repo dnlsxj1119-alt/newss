@@ -1,12 +1,13 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { Home, List, Settings } from 'lucide-react';
+import { Home, List, Calendar, Settings } from 'lucide-react';
 import styles from './BottomNav.module.css';
 
 const BottomNav: React.FC = () => {
   const navItems = [
     { to: '/', icon: <Home size={24} />, label: '홈' },
-    { to: '/records', icon: <List size={24} />, label: '기록' },
+    { to: '/calendar', icon: <Calendar size={24} />, label: '달력' },
+    { to: '/records', icon: <List size={24} />, label: '목록' },
     { to: '/settings', icon: <Settings size={24} />, label: '설정' },
   ];
 

@@ -20,6 +20,16 @@ const RecordForm: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const isEditing = !!id;
 
+  const today = format(new Date(), 'yyyy-MM-dd');
+  const [isIncluded, setIsIncluded] = useState(date === today);
+
+  // Update isIncluded when date changes (for new records)
+  useEffect(() => {
+    if (!isEditing) {
+      setIsIncluded(date === today);
+    }
+  }, [date, today, isEditing]);
+
   useEffect(() => {
     if (isEditing) {
       if (records.length === 0) {
@@ -27,13 +37,19 @@ const RecordForm: React.FC = () => {
       } else {
         const recordToEdit = records.find(r => r.id === id);
         if (recordToEdit) {
+          if (recordToEdit.member_name !== currentUser) {
+            alert('본인이 작성한 기록만 수정할 수 있습니다.');
+            navigate('/records');
+            return;
+          }
           setDate(recordToEdit.date);
           setRawText(recordToEdit.raw_text || '');
           setHeadlinesText(recordToEdit.headlines_text || '');
+          setIsIncluded(recordToEdit.is_included ?? true);
         }
       }
     }
-  }, [id, isEditing, records, fetchRecords]);
+  }, [id, isEditing, records, fetchRecords, currentUser, navigate]);
 
   // Regex-based "AI" Title Extraction
   const handleExtractTitles = () => {
@@ -42,8 +58,8 @@ const RecordForm: React.FC = () => {
       return;
     }
     
-    // Looks for lines starting with (1), (2) or 1., 2. etc.
-    const regex = /(?:\(\d+\)|\d+\.)\s*([^\n]+)/g;
+    // 매칭 가능한 형태: (1), [1], {1}, 1., 1)
+    const regex = /(?:\(\d+\)|\[\d+\]|\{\d+\}|\d+\.|\d+\))\s*([^\n]+)/g;
     const matches = [];
     let match;
     let count = 1;
@@ -69,54 +85,64 @@ const RecordForm: React.FC = () => {
       date,
       member_name: currentUser,
       raw_text: rawText,
-      headlines_text: headlinesText
+      headlines_text: headlinesText,
+      is_included: isIncluded
     };
 
-    let success = false;
+    let result;
     if (isEditing) {
-      success = await updateRecord(id!, recordData);
+      result = await updateRecord(id!, recordData);
     } else {
-      success = await addRecord(recordData);
+      result = await addRecord(recordData);
     }
 
     setIsSubmitting(false);
 
-    if (success) {
+    if (result.success) {
       navigate('/records');
     } else {
-      alert('저장 중 오류가 발생했습니다.');
+      alert(`저장 중 오류가 발생했습니다: ${result.error}`);
     }
   };
 
   return (
     <div style={{ padding: '1.5rem', paddingBottom: '2rem' }}>
-      <header style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center' }}>
-        <button 
-          onClick={() => navigate(-1)}
-          style={{ marginRight: '1rem', color: 'var(--text-secondary)' }}
-        >
-          ← 뒤로
-        </button>
-        <h1 style={{ fontSize: '1.5rem', margin: 0 }}>
-          {isEditing ? '기록 수정' : '새 기록 추가'}
-        </h1>
+      <header style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          <button 
+            onClick={() => navigate(-1)}
+            style={{ marginRight: '1rem', color: 'var(--text-secondary)' }}
+          >
+            ← 뒤로
+          </button>
+          <h1 style={{ fontSize: '1.5rem', margin: 0 }}>
+            {isEditing ? '기록 수정' : '새 기록 추가'}
+          </h1>
+        </div>
+        
+        {/* Author display moved to header */}
+        <div style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--badge-text)', background: 'var(--badge-bg)', border: '1px solid var(--badge-border)', padding: '0.3rem 0.75rem', borderRadius: 'var(--radius-full)' }}>
+          {currentUser}
+        </div>
       </header>
 
       <Card>
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-          <Input 
-            label="날짜" 
-            type="date" 
-            value={date} 
-            onChange={e => setDate(e.target.value)}
-            required
-          />
-
+          
           <div>
-            <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>작성자</label>
-            <div style={{ padding: '0.75rem 1rem', background: 'var(--bg-primary)', borderRadius: 'var(--radius-md)', color: 'var(--text-tertiary)', border: '1px solid var(--border-color)' }}>
-              {currentUser}
-            </div>
+            <Input 
+              label="날짜" 
+              type="date" 
+              value={date} 
+              onChange={e => setDate(e.target.value)}
+              required
+              style={{ marginBottom: '0.25rem' }}
+            />
+            {isIncluded ? (
+              <p style={{ margin: 0, fontSize: '0.75rem', color: 'var(--success)' }}>✓ 오늘 날짜이므로 완료율 계산에 포함됩니다.</p>
+            ) : (
+              <p style={{ margin: 0, fontSize: '0.75rem', color: 'var(--text-tertiary)' }}>⚠ 과거 기록이므로 완료율 계산에서 제외됩니다.</p>
+            )}
           </div>
 
           <div>
@@ -129,23 +155,15 @@ const RecordForm: React.FC = () => {
             />
           </div>
 
-          <div style={{ textAlign: 'center' }}>
-            <span style={{ color: 'var(--text-tertiary)', fontSize: '1.25rem' }}>↓</span>
-          </div>
-
           <Button 
             type="button" 
             variant="outline" 
             fullWidth 
-            style={{ borderColor: 'var(--accent-secondary)', color: 'var(--accent-secondary)' }}
+            style={{ borderColor: 'var(--accent-secondary)', color: 'var(--accent-secondary)', marginBottom: '0.5rem' }}
             onClick={handleExtractTitles}
           >
             ✨ AI 제목 추출
           </Button>
-
-          <div style={{ textAlign: 'center' }}>
-            <span style={{ color: 'var(--text-tertiary)', fontSize: '1.25rem' }}>↓</span>
-          </div>
 
           <div>
             <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>제목 목록</label>

@@ -38,7 +38,7 @@
 }
 
 .iconWrapper {
-  margin-bottom: 4px;
+  margin-bottom: -2px;
   transition: transform var(--transition-fast);
 }
 
@@ -52,9 +52,9 @@
 }
 
 .navItem.active {
-  color: var(--accent-primary);
+  color: var(--primary-color);
 }
 
 .navItem.active .iconWrapper {
-  transform: translateY(-2px);
+  transform: scale(1.05);
 }

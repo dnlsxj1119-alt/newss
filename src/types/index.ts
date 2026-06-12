@@ -4,8 +4,17 @@ export interface StudyRecord {
   member_name: string;
   raw_text: string;
   headlines_text: string;
+  is_included: boolean;
   created_at: string;
   updated_at: string;
+}
+
+export interface VacationPeriod {
+  id: string;
+  start_date: string;
+  end_date: string;
+  memo?: string;
+  created_at: string;
 }
 
 export interface VacationDay {

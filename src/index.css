@@ -10,9 +10,11 @@
   --text-secondary: #94a3b8;
   --text-tertiary: #64748b;
   
-  --accent-primary: #3b82f6; /* Elegant Blue */
-  --accent-primary-hover: #2563eb;
-  --accent-secondary: #8b5cf6; /* Elegant Purple */
+  --primary-color: #4F7DF3; 
+  --primary-color-hover: #3b6ae1;
+  --primary-color-rgb: 79, 125, 243;
+  
+  --accent-secondary: #8b5cf6; /* Elegant Purple for full completion */
   
   --success: #10b981;
   --error: #ef4444;
@@ -20,6 +22,12 @@
   
   --border-color: rgba(255, 255, 255, 0.1);
   --glass-bg: rgba(26, 29, 36, 0.7);
+  
+  --primary-bg: rgba(var(--primary-color-rgb), 0.05);
+  --primary-border: rgba(var(--primary-color-rgb), 0.12);
+  --badge-bg: rgba(var(--primary-color-rgb), 0.08);
+  --badge-border: rgba(var(--primary-color-rgb), 0.15);
+  --primary-text: var(--primary-color);
   
   --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
   --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
@@ -33,6 +41,30 @@
   
   --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
   --transition-normal: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+:root[data-theme="light"] {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f1f5f9;
+  --bg-elevated: #e2e8f0;
+  
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-tertiary: #64748b;
+  
+  --primary-color: #4F7DF3; 
+  --primary-color-hover: #3b6ae1;
+  --primary-color-rgb: 79, 125, 243;
+  --accent-secondary: #8b5cf6; 
+  
+  --border-color: #cbd5e1;
+  --glass-bg: rgba(255, 255, 255, 0.7);
+
+  --primary-bg: rgba(var(--primary-color-rgb), 0.05);
+  --primary-border: rgba(var(--primary-color-rgb), 0.12);
+  --badge-bg: rgba(var(--primary-color-rgb), 0.08);
+  --badge-border: rgba(var(--primary-color-rgb), 0.15);
+  --primary-text: var(--primary-color);
 }
 
 * {
@@ -60,7 +92,7 @@ body {
 }
 
 .gradient-text {
-  background: linear-gradient(to right, var(--accent-primary), var(--accent-secondary));
+  background: linear-gradient(to right, var(--primary-color), var(--accent-secondary));
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -108,8 +140,8 @@ input, textarea, select {
 
 input:focus, textarea:focus, select:focus {
   outline: none;
-  border-color: var(--accent-primary);
-  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(var(--primary-color-rgb), 0.2);
 }
 
 button {

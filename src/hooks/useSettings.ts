@@ -36,10 +36,10 @@ export const useSettings = () => {
         
       if (error) throw error;
       await fetchSettings();
-      return true;
-    } catch (err) {
+      return { success: true };
+    } catch (err: any) {
       console.error(`Error updating setting ${key}:`, err);
-      return false;
+      return { success: false, error: err.message };
     }
   };
 

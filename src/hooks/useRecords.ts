@@ -37,11 +37,11 @@ export const useRecords = () => {
 
       if (insertError) throw insertError;
       await fetchRecords();
-      return true;
+      return { success: true };
     } catch (err: any) {
       setError(err.message);
       console.error('Error adding record:', err);
-      return false;
+      return { success: false, error: err.message };
     } finally {
       setIsLoading(false);
     }
@@ -58,11 +58,11 @@ export const useRecords = () => {
 
       if (updateError) throw updateError;
       await fetchRecords();
-      return true;
+      return { success: true };
     } catch (err: any) {
       setError(err.message);
       console.error('Error updating record:', err);
-      return false;
+      return { success: false, error: err.message };
     } finally {
       setIsLoading(false);
     }
