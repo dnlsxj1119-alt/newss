@@ -1,0 +1,14 @@
+.layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  position: relative;
+  background-color: var(--bg-primary);
+}
+
+.mainContent {
+  flex: 1;
+  padding-bottom: 70px; /* Space for BottomNav */
+  display: flex;
+  flex-direction: column;
+}
