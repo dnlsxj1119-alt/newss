@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback } from 'react';
-import { supabase } from '../lib/supabase';
 
 const DEFAULT_MEMBERS = ["사용자 A", "사용자 B"];
 
@@ -7,18 +6,15 @@ export const useSettings = () => {
   const [members, setMembers] = useState<string[]>(DEFAULT_MEMBERS);
   const [isLoading, setIsLoading] = useState(true);
 
-  const fetchSettings = useCallback(async () => {
+  const fetchSettings = useCallback(() => {
     setIsLoading(true);
     try {
-      const { data, error } = await supabase.from('app_settings').select('*');
-      if (error) throw error;
-
-      if (data) {
-        const memSetting = data.find(s => s.key === 'members');
-        if (memSetting) setMembers(memSetting.value);
+      const savedMembers = localStorage.getItem('app_members');
+      if (savedMembers) {
+        setMembers(JSON.parse(savedMembers));
       }
     } catch (err) {
-      console.error('Error fetching settings:', err);
+      console.error('Error fetching settings from localStorage:', err);
     } finally {
       setIsLoading(false);
     }
@@ -30,12 +26,12 @@ export const useSettings = () => {
 
   const updateSetting = async (key: string, value: any) => {
     try {
-      const { error } = await supabase
-        .from('app_settings')
-        .upsert({ key, value, updated_at: new Date().toISOString() });
-        
-      if (error) throw error;
-      await fetchSettings();
+      if (key === 'members') {
+        localStorage.setItem('app_members', JSON.stringify(value));
+        setMembers(value);
+      } else {
+        localStorage.setItem(`app_setting_${key}`, JSON.stringify(value));
+      }
       return { success: true };
     } catch (err: any) {
       console.error(`Error updating setting ${key}:`, err);
@@ -50,3 +46,4 @@ export const useSettings = () => {
     refreshSettings: fetchSettings
   };
 };
+
