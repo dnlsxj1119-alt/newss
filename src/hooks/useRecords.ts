@@ -1,5 +1,4 @@
 import { useState, useCallback } from 'react';
-import { supabase } from '../lib/supabase';
 import type { StudyRecord } from '../types';
 
 export const useRecords = () => {
@@ -7,18 +6,22 @@ export const useRecords = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchRecords = useCallback(async () => {
+  const fetchRecords = useCallback(() => {
     setIsLoading(true);
     setError(null);
     try {
-      const { data, error: fetchError } = await supabase
-        .from('study_records')
-        .select('*')
-        .order('date', { ascending: false })
-        .order('created_at', { ascending: false });
-
-      if (fetchError) throw fetchError;
-      setRecords(data || []);
+      const savedRecords = localStorage.getItem('app_records');
+      let data: StudyRecord[] = savedRecords ? JSON.parse(savedRecords) : [];
+      
+      // Sort by date desc, then created_at desc
+      data.sort((a, b) => {
+        if (a.date !== b.date) {
+          return a.date < b.date ? 1 : -1;
+        }
+        return a.created_at < b.created_at ? 1 : -1;
+      });
+      
+      setRecords(data);
     } catch (err: any) {
       setError(err.message);
       console.error('Error fetching records:', err);
@@ -31,12 +34,20 @@ export const useRecords = () => {
     setIsLoading(true);
     setError(null);
     try {
-      const { error: insertError } = await supabase
-        .from('study_records')
-        .insert([recordData]);
-
-      if (insertError) throw insertError;
-      await fetchRecords();
+      const savedRecords = localStorage.getItem('app_records');
+      const data: StudyRecord[] = savedRecords ? JSON.parse(savedRecords) : [];
+      
+      const newRecord: StudyRecord = {
+        ...recordData,
+        id: Date.now().toString() + Math.random().toString(36).substring(2, 9),
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };
+      
+      data.push(newRecord);
+      localStorage.setItem('app_records', JSON.stringify(data));
+      
+      fetchRecords();
       return { success: true };
     } catch (err: any) {
       setError(err.message);
@@ -51,13 +62,21 @@ export const useRecords = () => {
     setIsLoading(true);
     setError(null);
     try {
-      const { error: updateError } = await supabase
-        .from('study_records')
-        .update({ ...recordData, updated_at: new Date().toISOString() })
-        .eq('id', id);
-
-      if (updateError) throw updateError;
-      await fetchRecords();
+      const savedRecords = localStorage.getItem('app_records');
+      const data: StudyRecord[] = savedRecords ? JSON.parse(savedRecords) : [];
+      
+      const index = data.findIndex(r => r.id === id);
+      if (index === -1) throw new Error('Record not found');
+      
+      data[index] = {
+        ...data[index],
+        ...recordData,
+        updated_at: new Date().toISOString()
+      };
+      
+      localStorage.setItem('app_records', JSON.stringify(data));
+      
+      fetchRecords();
       return { success: true };
     } catch (err: any) {
       setError(err.message);
@@ -72,13 +91,13 @@ export const useRecords = () => {
     setIsLoading(true);
     setError(null);
     try {
-      const { error: deleteError } = await supabase
-        .from('study_records')
-        .delete()
-        .eq('id', id);
-
-      if (deleteError) throw deleteError;
-      await fetchRecords();
+      const savedRecords = localStorage.getItem('app_records');
+      const data: StudyRecord[] = savedRecords ? JSON.parse(savedRecords) : [];
+      
+      const newData = data.filter(r => r.id !== id);
+      localStorage.setItem('app_records', JSON.stringify(newData));
+      
+      fetchRecords();
       return true;
     } catch (err: any) {
       setError(err.message);
