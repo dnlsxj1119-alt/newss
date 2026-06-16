@@ -10,7 +10,7 @@ import VacationModal from '../components/VacationModal';
 import { 
   format, addMonths, subMonths, startOfMonth, endOfMonth, 
   startOfWeek, endOfWeek, isSameMonth, isSameDay, addDays, 
-  eachDayOfInterval, isWeekend, subDays 
+  eachDayOfInterval, isWeekend 
 } from 'date-fns';
 import { ko } from 'date-fns/locale';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
@@ -18,7 +18,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 const CalendarView: React.FC = () => {
   const navigate = useNavigate();
   const { currentUser } = useUser();
-  const { records, fetchRecords, isLoading, deleteRecord } = useRecords();
+  const { records, fetchRecords, deleteRecord } = useRecords();
   const { members } = useSettings();
   const { vacations, fetchVacations, addVacation, updateVacation, deleteVacation } = useVacations();
   
@@ -316,7 +316,7 @@ const CalendarView: React.FC = () => {
                   </div>
                   <div style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
                     {record.headlines_text ? (
-                      record.headlines_text.split('\n').filter(Boolean).map((line, idx) => (
+                      record.headlines_text.split('\n').filter(Boolean).map((line: string, idx: number) => (
                         <div key={idx} style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.25rem' }}>
                           <span style={{ color: 'var(--text-tertiary)' }}>•</span>
                           <span>{line.replace(/^(\(\d+\)|\[\d+\]|\{\d+\}|\d+\.|\d+\))\s*/, '').trim()}</span>

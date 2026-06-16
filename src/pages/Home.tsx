@@ -3,7 +3,7 @@ import { useUser } from '../hooks/useUser';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
-import { format, parseISO, startOfMonth, endOfMonth, eachDayOfInterval, isWeekend, subDays } from 'date-fns';
+import { format, startOfMonth, endOfMonth, eachDayOfInterval, isWeekend, subDays } from 'date-fns';
 import { ko } from 'date-fns/locale';
 import { supabase } from '../lib/supabase';
 import { useSettings } from '../hooks/useSettings';
