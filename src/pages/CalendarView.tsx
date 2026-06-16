@@ -13,7 +13,7 @@ import {
   eachDayOfInterval, isWeekend 
 } from 'date-fns';
 import { ko } from 'date-fns/locale';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Pencil, Trash2 } from 'lucide-react';
 
 const CalendarView: React.FC = () => {
   const navigate = useNavigate();
@@ -25,11 +25,18 @@ const CalendarView: React.FC = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDateStr, setSelectedDateStr] = useState<string | null>(null);
   const [isVacationModalOpen, setIsVacationModalOpen] = useState(false);
+  const [expandedRecordId, setExpandedRecordId] = useState<string | null>(null);
 
   useEffect(() => {
     fetchRecords();
     fetchVacations();
   }, [fetchRecords, fetchVacations]);
+
+  useEffect(() => {
+    const handleDocumentClick = () => setExpandedRecordId(null);
+    document.addEventListener('click', handleDocumentClick);
+    return () => document.removeEventListener('click', handleDocumentClick);
+  }, []);
 
   const handleEdit = (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -294,8 +301,17 @@ const CalendarView: React.FC = () => {
             <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem' }}>이 날짜에 작성된 기록이 없습니다.</p>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-              {(recordsByDate[selectedDateStr] || []).map(record => (
-                <div key={record.id}>
+              {(recordsByDate[selectedDateStr] || []).map(record => {
+                const isExpanded = expandedRecordId === record.id;
+                return (
+                <div 
+                  key={record.id}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setExpandedRecordId(isExpanded ? null : record.id);
+                  }}
+                  style={{ cursor: 'pointer' }}
+                >
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                       <span style={{ fontSize: '0.875rem', fontWeight: 700, color: 'var(--text-primary)' }}>
@@ -307,10 +323,14 @@ const CalendarView: React.FC = () => {
                         </span>
                       )}
                     </div>
-                    {record.member_name === currentUser && (
+                    {record.member_name === currentUser && isExpanded && (
                       <div style={{ display: 'flex', gap: '0.5rem' }}>
-                        <button onClick={(e) => handleEdit(record.id, e)} style={{ background: 'none', border: 'none', fontSize: '1rem', cursor: 'pointer', padding: 0 }} title="수정">✏️</button>
-                        <button onClick={(e) => handleDelete(record.id, e)} style={{ background: 'none', border: 'none', fontSize: '1rem', cursor: 'pointer', padding: 0 }} title="삭제">🗑️</button>
+                        <button onClick={(e) => handleEdit(record.id, e)} className="icon-btn edit-btn" title="수정">
+                          <Pencil size={16} />
+                        </button>
+                        <button onClick={(e) => handleDelete(record.id, e)} className="icon-btn delete-btn" title="삭제">
+                          <Trash2 size={16} />
+                        </button>
                       </div>
                     )}
                   </div>
@@ -330,7 +350,7 @@ const CalendarView: React.FC = () => {
                     )}
                   </div>
                 </div>
-              ))}
+              )})}
             </div>
           )}
         </div>

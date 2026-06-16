@@ -151,3 +151,31 @@ button {
   background: none;
   transition: all var(--transition-fast);
 }
+
+.icon-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.35rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  transition: all var(--transition-fast);
+}
+
+.edit-btn {
+  color: var(--text-tertiary);
+}
+.edit-btn:hover {
+  color: var(--text-secondary);
+  background: var(--bg-elevated);
+}
+
+.delete-btn {
+  color: var(--error);
+}
+.delete-btn:hover {
+  color: #b91c1c;
+  background: rgba(239, 68, 68, 0.1);
+}

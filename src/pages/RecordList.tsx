@@ -7,6 +7,7 @@ import { Card } from '../components/ui/Card';
 import { Input } from '../components/ui/Input';
 import { format, parseISO } from 'date-fns';
 import { ko } from 'date-fns/locale';
+import { Pencil, Trash2 } from 'lucide-react';
 
 const RecordList: React.FC = () => {
   const navigate = useNavigate();
@@ -21,6 +22,12 @@ const RecordList: React.FC = () => {
   useEffect(() => {
     fetchRecords();
   }, [fetchRecords]);
+
+  useEffect(() => {
+    const handleDocumentClick = () => setExpandedId(null);
+    document.addEventListener('click', handleDocumentClick);
+    return () => document.removeEventListener('click', handleDocumentClick);
+  }, []);
 
   const handleDelete = async (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -82,7 +89,10 @@ const RecordList: React.FC = () => {
             return (
               <Card 
                 key={record.id} 
-                onClick={() => setExpandedId(isExpanded ? null : record.id)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setExpandedId(isExpanded ? null : record.id);
+                }}
                 style={{ cursor: 'pointer', padding: '1.25rem' }}
               >
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
@@ -97,10 +107,14 @@ const RecordList: React.FC = () => {
                     )}
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    {record.member_name === currentUser && (
+                    {record.member_name === currentUser && isExpanded && (
                       <div style={{ display: 'flex', gap: '0.5rem', marginRight: '0.25rem' }}>
-                        <button onClick={(e) => handleEdit(record.id, e)} style={{ background: 'none', border: 'none', fontSize: '1rem', cursor: 'pointer', padding: 0 }} title="수정">✏️</button>
-                        <button onClick={(e) => handleDelete(record.id, e)} style={{ background: 'none', border: 'none', fontSize: '1rem', cursor: 'pointer', padding: 0 }} title="삭제">🗑️</button>
+                        <button onClick={(e) => handleEdit(record.id, e)} className="icon-btn edit-btn" title="수정">
+                          <Pencil size={16} />
+                        </button>
+                        <button onClick={(e) => handleDelete(record.id, e)} className="icon-btn delete-btn" title="삭제">
+                          <Trash2 size={16} />
+                        </button>
                       </div>
                     )}
                     <span style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--badge-text)', background: 'var(--badge-bg)', border: '1px solid var(--badge-border)', padding: '0.2rem 0.6rem', borderRadius: 'var(--radius-full)' }}>
