@@ -37,15 +37,15 @@
 
 /* Variants */
 .primary {
-  background-color: var(--primary-color);
+  background: var(--primary-gradient);
   color: white;
-  box-shadow: 0 4px 14px 0 rgba(59, 130, 246, 0.39);
+  box-shadow: 0 4px 14px 0 rgba(var(--primary-color-rgb), 0.39);
 }
 
 .primary:hover:not(:disabled) {
-  background-color: var(--primary-color-hover);
+  opacity: 0.9;
   transform: translateY(-1px);
-  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.23);
+  box-shadow: 0 6px 20px rgba(var(--primary-color-rgb), 0.23);
 }
 
 .secondary {

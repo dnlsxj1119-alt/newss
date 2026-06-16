@@ -23,16 +23,20 @@ const App: React.FC = () => {
       document.documentElement.removeAttribute('data-theme');
     }
 
-    // Load custom primary color
-    const savedColor = localStorage.getItem('primaryColor');
-    if (savedColor) {
-      document.documentElement.style.setProperty('--primary-color', savedColor);
-      const hexToRgb = (hex: string) => {
-        const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-        return result ? `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}` : '79, 125, 243';
-      };
-      document.documentElement.style.setProperty('--primary-color-rgb', hexToRgb(savedColor));
-    }
+    // Load custom primary gradient
+    const savedStart = localStorage.getItem('primaryStart') || '#60A5FA';
+    const savedEnd = localStorage.getItem('primaryEnd') || localStorage.getItem('primaryColor') || '#2563EB';
+
+    document.documentElement.style.setProperty('--primary-gradient-start', savedStart);
+    document.documentElement.style.setProperty('--primary-gradient-end', savedEnd);
+    document.documentElement.style.setProperty('--primary-gradient', `linear-gradient(135deg, ${savedStart}, ${savedEnd})`);
+    document.documentElement.style.setProperty('--primary-color', savedEnd);
+
+    const hexToRgb = (hex: string) => {
+      const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+      return result ? `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}` : '37, 99, 235';
+    };
+    document.documentElement.style.setProperty('--primary-color-rgb', hexToRgb(savedEnd));
   }, []);
 
   if (isLoading) {

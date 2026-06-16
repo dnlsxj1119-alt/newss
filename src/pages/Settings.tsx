@@ -13,12 +13,12 @@ const Settings: React.FC = () => {
   const [primaryColor, setPrimaryColor] = useState('#4F7DF3');
 
   const THEME_PRESETS = [
-    { name: 'Blue', color: '#4F7DF3' },
-    { name: 'Purple', color: '#8B5CF6' },
-    { name: 'Green', color: '#22C55E' },
-    { name: 'Pink', color: '#EC4899' },
-    { name: 'Orange', color: '#F97316' },
-    { name: 'Gray', color: '#64748B' },
+    { name: 'Blue', start: '#60A5FA', end: '#2563EB' },
+    { name: 'Purple', start: '#A78BFA', end: '#7C3AED' },
+    { name: 'Pink', start: '#F472B6', end: '#DB2777' },
+    { name: 'Green', start: '#4ADE80', end: '#16A34A' },
+    { name: 'Orange', start: '#FB923C', end: '#EA580C' },
+    { name: 'Gray', start: '#94A3B8', end: '#475569' },
   ];
 
   useEffect(() => {
@@ -37,20 +37,26 @@ const Settings: React.FC = () => {
     localStorage.setItem('theme', newTheme);
   };
 
-  const handleColorChange = (hex: string) => {
-    setPrimaryColor(hex);
-    localStorage.setItem('primaryColor', hex);
-    document.documentElement.style.setProperty('--primary-color', hex);
+  const handleColorChange = (start: string, end: string) => {
+    setPrimaryColor(end);
+    localStorage.setItem('primaryStart', start);
+    localStorage.setItem('primaryEnd', end);
+    localStorage.setItem('primaryColor', end);
+    
+    document.documentElement.style.setProperty('--primary-gradient-start', start);
+    document.documentElement.style.setProperty('--primary-gradient-end', end);
+    document.documentElement.style.setProperty('--primary-gradient', `linear-gradient(135deg, ${start}, ${end})`);
+    document.documentElement.style.setProperty('--primary-color', end);
     
     const hexToRgb = (h: string) => {
       const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(h);
-      return result ? `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}` : '79, 125, 243';
+      return result ? `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}` : '37, 99, 235';
     };
-    document.documentElement.style.setProperty('--primary-color-rgb', hexToRgb(hex));
+    document.documentElement.style.setProperty('--primary-color-rgb', hexToRgb(end));
   };
 
   const resetThemeColor = () => {
-    handleColorChange('#4F7DF3');
+    handleColorChange('#60A5FA', '#2563EB');
   };
 
   const handleExport = () => {
@@ -104,7 +110,7 @@ const Settings: React.FC = () => {
           {THEME_PRESETS.map((preset) => (
             <button
               key={preset.name}
-              onClick={() => handleColorChange(preset.color)}
+              onClick={() => handleColorChange(preset.start, preset.end)}
               style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -112,14 +118,14 @@ const Settings: React.FC = () => {
                 padding: '0.75rem',
                 borderRadius: 'var(--radius-md)',
                 background: 'var(--bg-secondary)',
-                border: primaryColor.toLowerCase() === preset.color.toLowerCase() 
-                  ? `2px solid ${preset.color}` 
+                border: primaryColor.toLowerCase() === preset.end.toLowerCase() 
+                  ? `2px solid ${preset.end}` 
                   : '2px solid transparent',
                 cursor: 'pointer',
                 transition: 'all var(--transition-fast)'
               }}
             >
-              <div style={{ width: '16px', height: '16px', borderRadius: '50%', background: preset.color }} />
+              <div style={{ width: '16px', height: '16px', borderRadius: '50%', background: `linear-gradient(135deg, ${preset.start}, ${preset.end})` }} />
               <span style={{ fontSize: '0.875rem', fontWeight: 500, color: 'var(--text-primary)' }}>{preset.name}</span>
             </button>
           ))}

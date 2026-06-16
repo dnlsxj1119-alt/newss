@@ -153,9 +153,9 @@ const CalendarView: React.FC = () => {
 
         const baseBg = isVacation 
           ? 'repeating-linear-gradient(45deg, transparent, transparent 5px, rgba(148, 163, 184, 0.1) 5px, rgba(148, 163, 184, 0.1) 10px)'
-          : isSelected ? 'var(--primary-bg)' : 'transparent';
+          : isSelected ? 'var(--primary-gradient)' : 'transparent';
 
-        const textColor = isToday ? 'var(--primary-color)' : 'var(--text-primary)';
+        const textColor = isToday ? 'var(--primary-color)' : isSelected ? '#ffffff' : 'var(--text-primary)';
         const borderColor = isSelected ? 'var(--primary-color)' : isVacation ? 'rgba(148, 163, 184, 0.2)' : 'transparent';
 
         const dayToStore = day; // capture in closure
@@ -220,7 +220,7 @@ const CalendarView: React.FC = () => {
               <div key={m} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '0.8125rem' }}>
                 <span style={{ fontWeight: 600, width: '40px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{m}</span>
                 <div style={{ flex: 1, height: '4px', background: 'var(--bg-elevated)', borderRadius: 'var(--radius-full)', overflow: 'hidden', display: 'flex' }}>
-                  <div style={{ width: `${rate}%`, height: '100%', background: 'var(--text-secondary)' }} />
+                  <div style={{ width: `${rate}%`, height: '100%', background: 'var(--primary-gradient)' }} />
                 </div>
                 <span style={{ color: 'var(--text-secondary)', width: '75px', textAlign: 'right', whiteSpace: 'nowrap' }}>
                   {count}/{activeWeekdaysInMonth}일 <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>({rate}%)</span>
@@ -236,7 +236,7 @@ const CalendarView: React.FC = () => {
               <div style={{ 
                 width: `${Math.min(Math.round((completionStats.overallCount / Math.max(activeWeekdaysInMonth, 1)) * 100), 100)}%`, 
                 height: '100%', 
-                background: 'var(--accent-secondary)' 
+                background: 'var(--primary-gradient)' 
               }} />
             </div>
             <span style={{ color: 'var(--text-secondary)', width: '75px', textAlign: 'right', whiteSpace: 'nowrap' }}>
