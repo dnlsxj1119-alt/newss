@@ -188,8 +188,8 @@ const CalendarView: React.FC = () => {
               {formattedDate}
             </div>
             <div style={{ display: 'flex', gap: '3px', height: '14px', alignItems: 'center' }}>
-              {wroteA && <span style={{ fontSize: '0.65rem', lineHeight: 1, color: 'var(--text-primary)' }}>●</span>}
-              {wroteB && <span style={{ fontSize: '0.65rem', lineHeight: 1, color: 'var(--text-primary)' }}>○</span>}
+              {wroteA && <span style={{ fontSize: '0.65rem', lineHeight: 1, color: 'var(--primary-color)' }}>●</span>}
+              {wroteB && <span style={{ fontSize: '0.65rem', lineHeight: 1, color: 'var(--primary-color)' }}>○</span>}
             </div>
           </div>
         );
@@ -274,12 +274,12 @@ const CalendarView: React.FC = () => {
         <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', marginTop: '1.5rem', fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
           {members[0] && (
             <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-              <span style={{ fontSize: '0.75rem', color: 'var(--text-primary)' }}>●</span> {members[0]} 작성
+              <span style={{ fontSize: '0.75rem', color: 'var(--primary-color)' }}>●</span> {members[0]} 작성
             </div>
           )}
           {members[1] && (
             <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-              <span style={{ fontSize: '0.75rem', color: 'var(--text-primary)' }}>○</span> {members[1]} 작성
+              <span style={{ fontSize: '0.75rem', color: 'var(--primary-color)' }}>○</span> {members[1]} 작성
             </div>
           )}
         </div>
