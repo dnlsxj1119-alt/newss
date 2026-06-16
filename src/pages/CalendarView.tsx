@@ -136,10 +136,6 @@ const CalendarView: React.FC = () => {
     let formattedDate = '';
     const today = new Date();
     
-    // Assign colors
-    const colorA = 'var(--primary-color)';
-    const colorB = 'var(--primary-color)';
-
     while (day <= endDate) {
       for (let i = 0; i < 7; i++) {
         formattedDate = format(day, 'd');
@@ -191,9 +187,9 @@ const CalendarView: React.FC = () => {
             }}>
               {formattedDate}
             </div>
-            <div style={{ display: 'flex', gap: '3px', height: '5px' }}>
-              {wroteA && <div style={{ width: '5px', height: '5px', borderRadius: '50%', background: colorA }} />}
-              {wroteB && <div style={{ width: '5px', height: '5px', borderRadius: '50%', background: colorB }} />}
+            <div style={{ display: 'flex', gap: '3px', height: '14px', alignItems: 'center' }}>
+              {wroteA && <span style={{ fontSize: '0.65rem', lineHeight: 1, color: 'var(--text-primary)' }}>●</span>}
+              {wroteB && <span style={{ fontSize: '0.65rem', lineHeight: 1, color: 'var(--text-primary)' }}>○</span>}
             </div>
           </div>
         );
@@ -278,12 +274,12 @@ const CalendarView: React.FC = () => {
         <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', marginTop: '1.5rem', fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
           {members[0] && (
             <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-              <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: '#3b82f6' }} /> {members[0]} 작성
+              <span style={{ fontSize: '0.75rem', color: 'var(--text-primary)' }}>●</span> {members[0]} 작성
             </div>
           )}
           {members[1] && (
             <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-              <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: '#10b981' }} /> {members[1]} 작성
+              <span style={{ fontSize: '0.75rem', color: 'var(--text-primary)' }}>○</span> {members[1]} 작성
             </div>
           )}
         </div>
