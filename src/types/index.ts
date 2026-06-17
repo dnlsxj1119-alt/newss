@@ -1,7 +1,12 @@
+export interface Member {
+  profile_id: string;
+  display_name: string;
+}
+
 export interface StudyRecord {
   id: string;
   date: string; // YYYY-MM-DD
-  member_name: string;
+  member_name: string; // Note: stores profile_id (e.g., 'user1') instead of display_name
   raw_text: string;
   headlines_text: string;
   is_included: boolean;

@@ -64,13 +64,15 @@ const RecordList: React.FC = () => {
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
-        <select 
-          value={filterMember} 
-          onChange={e => setFilterMember(e.target.value)}
-          style={{ width: '100%', padding: '0.75rem 1rem', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', borderRadius: 'var(--radius-md)' }}
+        <select
+          value={filterMember}
+          onChange={(e) => setFilterMember(e.target.value)}
+          style={{ padding: '0.5rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', background: 'var(--bg-primary)', color: 'var(--text-primary)' }}
         >
-          <option value="">모든 참여자</option>
-          {members.map(m => <option key={m} value={m}>{m}</option>)}
+          <option value="">전체 작성자</option>
+          {members.map(m => (
+            <option key={m.profile_id} value={m.profile_id}>{m.display_name}</option>
+          ))}
         </select>
       </div>
 
@@ -96,7 +98,10 @@ const RecordList: React.FC = () => {
                 style={{ cursor: 'pointer', padding: '1.25rem' }}
               >
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                    <span style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-primary)' }}>
+                      {members.find(m => m.profile_id === record.member_name)?.display_name || record.member_name}
+                    </span>
                     <span style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', fontWeight: 500 }}>
                       {format(parseISO(record.date), 'yyyy년 M월 d일', { locale: ko })}
                     </span>

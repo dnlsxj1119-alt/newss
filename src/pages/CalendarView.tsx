@@ -82,7 +82,7 @@ const CalendarView: React.FC = () => {
   // Compute Completion Rates for displayed month
   const { completionStats } = useMemo(() => {
     const stats: Record<string, number> = {};
-    members.forEach(m => stats[m] = 0);
+    members.forEach(m => stats[m.profile_id] = 0);
     let overallCount = 0;
 
     const days = eachDayOfInterval({ start: monthStart, end: monthEnd });
@@ -98,8 +98,8 @@ const CalendarView: React.FC = () => {
       
       let allMembersWrote = true;
       members.forEach(m => {
-        if (validRecords.some(r => r.member_name === m)) {
-          stats[m]++;
+        if (validRecords.some(r => r.member_name === m.profile_id)) {
+          stats[m.profile_id]++;
         } else {
           allMembersWrote = false;
         }
@@ -148,8 +148,8 @@ const CalendarView: React.FC = () => {
         const isVacation = vacations.some(v => dateStr >= v.start_date && dateStr <= v.end_date);
         const isSelected = selectedDateStr === dateStr;
 
-        let wroteA = members[0] && validRecords.some(r => r.member_name === members[0]);
-        let wroteB = members[1] && validRecords.some(r => r.member_name === members[1]);
+        let wroteA = members[0] && validRecords.some(r => r.member_name === members[0].profile_id);
+        let wroteB = members[1] && validRecords.some(r => r.member_name === members[1].profile_id);
 
         const baseBg = isVacation 
           ? 'repeating-linear-gradient(45deg, transparent, transparent 5px, rgba(148, 163, 184, 0.1) 5px, rgba(148, 163, 184, 0.1) 10px)'
@@ -214,11 +214,11 @@ const CalendarView: React.FC = () => {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
           
           {members.map(m => {
-            const count = completionStats.memberStats[m] || 0;
+            const count = completionStats.memberStats[m.profile_id] || 0;
             const rate = Math.min(Math.round((count / Math.max(activeWeekdaysInMonth, 1)) * 100), 100);
             return (
-              <div key={m} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '0.8125rem' }}>
-                <span style={{ fontWeight: 600, width: '40px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{m}</span>
+              <div key={m.profile_id} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '0.8125rem' }}>
+                <span style={{ fontWeight: 600, width: '40px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{m.display_name}</span>
                 <div style={{ flex: 1, height: '4px', background: 'var(--bg-elevated)', borderRadius: 'var(--radius-full)', overflow: 'hidden', display: 'flex' }}>
                   <div style={{ width: `${rate}%`, height: '100%', background: 'var(--primary-gradient)' }} />
                 </div>
@@ -272,16 +272,8 @@ const CalendarView: React.FC = () => {
         
         {/* 범례 */}
         <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', marginTop: '1.5rem', fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
-          {members[0] && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-              <span style={{ fontSize: '0.75rem', color: 'var(--primary-color)' }}>●</span> {members[0]} 작성
-            </div>
-          )}
-          {members[1] && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-              <span style={{ fontSize: '0.75rem', color: 'var(--primary-color)' }}>○</span> {members[1]} 작성
-            </div>
-          )}
+          {members[0] && <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}><span style={{ color: 'var(--primary-color)' }}>●</span> <span>{members[0].display_name} 작성</span></div>}
+          {members[1] && <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}><span style={{ color: 'var(--primary-color)' }}>○</span> <span>{members[1].display_name} 작성</span></div>}
         </div>
       </Card>
 
@@ -311,7 +303,7 @@ const CalendarView: React.FC = () => {
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                       <span style={{ fontSize: '0.875rem', fontWeight: 700, color: 'var(--text-primary)' }}>
-                        {record.member_name}
+                        {members.find(m => m.profile_id === record.member_name)?.display_name || record.member_name}
                       </span>
                       {record.is_included === false && (
                         <span style={{ fontSize: '0.7rem', color: 'var(--badge-text)', background: 'var(--badge-bg)', border: '1px solid var(--badge-border)', padding: '0.1rem 0.3rem', borderRadius: '4px' }}>

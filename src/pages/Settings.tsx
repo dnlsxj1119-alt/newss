@@ -137,11 +137,50 @@ const Settings: React.FC = () => {
       <Card>
         <h3 style={{ fontSize: '1.125rem', marginTop: 0, marginBottom: '1rem' }}>데이터 관리</h3>
         <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', marginBottom: '1rem' }}>
-          작성한 모든 기록을 JSON 파일로 백업할 수 있습니다.
+          작성한 모든 기록을 JSON 파일로 백업하거나, 기존 브라우저에 저장된 로컬 데이터를 DB로 이전할 수 있습니다.
         </p>
-        <Button variant="primary" fullWidth onClick={handleExport}>
-          기록 백업하기 (JSON 내보내기)
-        </Button>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+          <Button variant="outline" fullWidth onClick={handleExport}>
+            기록 백업하기 (JSON 내보내기)
+          </Button>
+          <Button variant="primary" fullWidth onClick={async () => {
+            const localRecordsStr = localStorage.getItem('app_records');
+            if (!localRecordsStr) {
+              alert('이전할 로컬 데이터가 없습니다.');
+              return;
+            }
+            try {
+              const localRecords = JSON.parse(localRecordsStr);
+              if (!Array.isArray(localRecords) || localRecords.length === 0) {
+                alert('이전할 데이터가 비어 있습니다.');
+                return;
+              }
+              
+              const { supabase } = await import('../lib/supabase');
+              const membersList = JSON.parse(localStorage.getItem('app_members') || '[]');
+              
+              const mappedRecords = localRecords.map(r => {
+                const member = membersList.find((m: any) => m.display_name === r.member_name);
+                const profile_id = member ? member.profile_id : 'user1';
+                
+                const { member_name, ...rest } = r;
+                return {
+                  ...rest,
+                  profile_id
+                };
+              });
+
+              const { error } = await supabase.from('study_records').upsert(mappedRecords);
+              if (error) throw error;
+              
+              alert(`총 ${mappedRecords.length}건의 기록이 성공적으로 DB로 옮겨졌습니다.`);
+            } catch (err: any) {
+              alert(`마이그레이션 중 오류가 발생했습니다: ${err.message}`);
+            }
+          }}>
+            로컬 기록을 DB로 옮기기 (동기화 복구)
+          </Button>
+        </div>
       </Card>
     </div>
   );

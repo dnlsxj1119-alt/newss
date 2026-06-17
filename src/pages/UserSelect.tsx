@@ -9,11 +9,11 @@ const UserSelect: React.FC = () => {
   const { members, updateSetting } = useSettings();
   
   const [isEditing, setIsEditing] = useState(false);
-  const [editMembers, setEditMembers] = useState(members);
+  const [editMembers, setEditMembers] = useState(members.map(m => m.display_name));
   const [isSaving, setIsSaving] = useState(false);
 
-  const handleLogin = (username: string) => {
-    login(username);
+  const handleLogin = (profileId: string) => {
+    login(profileId);
   };
 
   const handleMemberChange = (index: number, val: string) => {
@@ -28,7 +28,13 @@ const UserSelect: React.FC = () => {
       return;
     }
     setIsSaving(true);
-    const result = await updateSetting('members', editMembers);
+    
+    const updatedMembers = members.map((m, i) => ({
+      ...m,
+      display_name: editMembers[i]
+    }));
+    
+    const result = await updateSetting('members', updatedMembers);
     setIsSaving(false);
     
     if (result.success) {
@@ -71,7 +77,7 @@ const UserSelect: React.FC = () => {
               placeholder="두 번째 사용자"
             />
             <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem' }}>
-              <Button variant="outline" fullWidth onClick={() => { setIsEditing(false); setEditMembers(members); }}>
+              <Button variant="outline" fullWidth onClick={() => { setIsEditing(false); setEditMembers(members.map(m => m.display_name)); }}>
                 취소
               </Button>
               <Button variant="primary" fullWidth onClick={saveMembers} disabled={isSaving}>
@@ -83,10 +89,10 @@ const UserSelect: React.FC = () => {
           <>
             {members.map(member => (
               <Button 
-                key={member}
+                key={member.profile_id}
                 size="lg" 
                 variant="secondary"
-                onClick={() => handleLogin(member)}
+                onClick={() => handleLogin(member.profile_id)}
                 style={{ 
                   height: '4rem', 
                   fontSize: '1.125rem', 
@@ -96,12 +102,12 @@ const UserSelect: React.FC = () => {
                   alignItems: 'center'
                 }}
               >
-                {member}
+                {member.display_name}
               </Button>
             ))}
             
             <button 
-              onClick={() => { setIsEditing(true); setEditMembers(members); }}
+              onClick={() => { setIsEditing(true); setEditMembers(members.map(m => m.display_name)); }}
               style={{
                 marginTop: '1.5rem',
                 background: 'none',

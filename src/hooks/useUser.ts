@@ -14,9 +14,9 @@ export const useUser = () => {
     setIsLoading(false);
   }, []);
 
-  const login = (username: string) => {
-    localStorage.setItem(USER_KEY, username);
-    setCurrentUser(username);
+  const login = (profileId: string) => {
+    localStorage.setItem(USER_KEY, profileId);
+    setCurrentUser(profileId);
     window.location.href = '/';
   };
 
