@@ -170,10 +170,17 @@ const Settings: React.FC = () => {
                 };
               });
 
-              const { error } = await supabase.from('study_records').upsert(mappedRecords);
-              if (error) throw error;
+              console.log('--- 마이그레이션 실행 ---');
+              console.log('업로드 대상 데이터 ( mappedRecords ):', mappedRecords);
               
-              alert(`총 ${mappedRecords.length}건의 기록이 성공적으로 DB로 옮겨졌습니다.`);
+              const { data, error } = await supabase.from('study_records').upsert(mappedRecords).select();
+              if (error) {
+                console.error('마이그레이션 실패 (upsert error):', error);
+                throw error;
+              }
+              
+              console.log('마이그레이션 성공! (upsert 결과):', data);
+              alert(`총 ${mappedRecords.length}건의 기록이 성공적으로 DB로 옮겨졌습니다. 콘솔 로그를 확인해주세요.`);
             } catch (err: any) {
               alert(`마이그레이션 중 오류가 발생했습니다: ${err.message}`);
             }

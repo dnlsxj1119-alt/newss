@@ -68,6 +68,27 @@ const App: React.FC = () => {
       console.log('   - Because it fetches from DB, local data is completely ignored until you press the [Migrate] button.');
       console.log('   - If you press "로컬 기록을 DB로 옮기기" in Settings, it will upload these local records to DB, making them visible again.');
       console.log('==============================================');
+      
+      // Supabase Connection Test
+      import('./lib/supabase').then(async ({ supabase }) => {
+        console.log('============= SUPABASE CONNECTION TEST =============');
+        const urlMatch = import.meta.env.VITE_SUPABASE_URL || 'https://tzzgvesyyttgtuqksxqf.supabase.co (Fallback)';
+        console.log('1. Supabase URL:', urlMatch);
+        
+        try {
+          const { data, error } = await supabase.from('study_records').select('id').limit(1);
+          if (error) {
+            console.error('2. Supabase 연결/조회 실패:', error);
+          } else {
+            console.log('2. Supabase 연결 성공! (Select 결과 정상 작동)');
+            console.log('3. study_records select 테스트 데이터 결과:', data);
+          }
+        } catch (err) {
+          console.error('2. Supabase 연결 예외 발생:', err);
+        }
+        console.log('====================================================');
+      });
+
     } catch (e) {
       console.error('Failed to parse localStorage data for check:', e);
     }
