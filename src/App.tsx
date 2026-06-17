@@ -37,61 +37,6 @@ const App: React.FC = () => {
       return result ? `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}` : '37, 99, 235';
     };
     document.documentElement.style.setProperty('--primary-color-rgb', hexToRgb(savedEnd));
-
-    // Check existing localStorage data
-    try {
-      const recordsStr = localStorage.getItem('app_records');
-      const records = recordsStr ? JSON.parse(recordsStr) : null;
-      const membersStr = localStorage.getItem('app_members');
-      const currentUserLocal = localStorage.getItem('news_study_user');
-      
-      console.log('============= LOCALSTORAGE DEBUG =============');
-      console.log('1. Object.keys(localStorage):', Object.keys(localStorage));
-      console.log('2. app_records:', recordsStr ? recordsStr.substring(0, 100) + '...' : 'null');
-      console.log('   app_members:', membersStr);
-      console.log('   news_study_user:', currentUserLocal);
-      
-      if (records && Array.isArray(records)) {
-        console.log('3. app_records count:', records.length);
-        if (records.length > 0) {
-          console.log('   First record example:', records[0]);
-          console.log('   member_name value in first record:', records[0].member_name);
-        }
-      } else {
-        console.log('3. app_records is empty or invalid.');
-      }
-      
-      console.log('4. Current selected user (news_study_user):', currentUserLocal);
-      
-      console.log('5. Why is it not on screen?');
-      console.log('   - The app now fetches directly from Supabase (study_records table).');
-      console.log('   - Because it fetches from DB, local data is completely ignored until you press the [Migrate] button.');
-      console.log('   - If you press "로컬 기록을 DB로 옮기기" in Settings, it will upload these local records to DB, making them visible again.');
-      console.log('==============================================');
-      
-      // Supabase Connection Test
-      import('./lib/supabase').then(async ({ supabase }) => {
-        console.log('============= SUPABASE CONNECTION TEST =============');
-        const urlMatch = import.meta.env.VITE_SUPABASE_URL || 'https://tzzgvesyyttgtuqksxqf.supabase.co (Fallback)';
-        console.log('1. Supabase URL:', urlMatch);
-        
-        try {
-          const { data, error } = await supabase.from('study_records').select('id').limit(1);
-          if (error) {
-            console.error('2. Supabase 연결/조회 실패:', error);
-          } else {
-            console.log('2. Supabase 연결 성공! (Select 결과 정상 작동)');
-            console.log('3. study_records select 테스트 데이터 결과:', data);
-          }
-        } catch (err) {
-          console.error('2. Supabase 연결 예외 발생:', err);
-        }
-        console.log('====================================================');
-      });
-
-    } catch (e) {
-      console.error('Failed to parse localStorage data for check:', e);
-    }
   }, []);
 
   if (isLoading) {
