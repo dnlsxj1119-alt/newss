@@ -37,6 +37,22 @@ const App: React.FC = () => {
       return result ? `${parseInt(result[1], 16)}, ${parseInt(result[2], 16)}, ${parseInt(result[3], 16)}` : '37, 99, 235';
     };
     document.documentElement.style.setProperty('--primary-color-rgb', hexToRgb(savedEnd));
+
+    // Check existing localStorage data
+    try {
+      const recordsStr = localStorage.getItem('app_records');
+      const records = recordsStr ? JSON.parse(recordsStr) : [];
+      const membersStr = localStorage.getItem('app_members');
+      const currentUserLocal = localStorage.getItem('news_study_user');
+      
+      console.log('--- LocalStorage Data Check ---');
+      console.log('1. app_records count:', Array.isArray(records) ? records.length : 0);
+      console.log('2. app_members:', membersStr);
+      console.log('3. news_study_user:', currentUserLocal);
+      console.log('-------------------------------');
+    } catch (e) {
+      console.error('Failed to parse localStorage data for check:', e);
+    }
   }, []);
 
   if (isLoading) {
