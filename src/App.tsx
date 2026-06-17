@@ -41,15 +41,33 @@ const App: React.FC = () => {
     // Check existing localStorage data
     try {
       const recordsStr = localStorage.getItem('app_records');
-      const records = recordsStr ? JSON.parse(recordsStr) : [];
+      const records = recordsStr ? JSON.parse(recordsStr) : null;
       const membersStr = localStorage.getItem('app_members');
       const currentUserLocal = localStorage.getItem('news_study_user');
       
-      console.log('--- LocalStorage Data Check ---');
-      console.log('1. app_records count:', Array.isArray(records) ? records.length : 0);
-      console.log('2. app_members:', membersStr);
-      console.log('3. news_study_user:', currentUserLocal);
-      console.log('-------------------------------');
+      console.log('============= LOCALSTORAGE DEBUG =============');
+      console.log('1. Object.keys(localStorage):', Object.keys(localStorage));
+      console.log('2. app_records:', recordsStr ? recordsStr.substring(0, 100) + '...' : 'null');
+      console.log('   app_members:', membersStr);
+      console.log('   news_study_user:', currentUserLocal);
+      
+      if (records && Array.isArray(records)) {
+        console.log('3. app_records count:', records.length);
+        if (records.length > 0) {
+          console.log('   First record example:', records[0]);
+          console.log('   member_name value in first record:', records[0].member_name);
+        }
+      } else {
+        console.log('3. app_records is empty or invalid.');
+      }
+      
+      console.log('4. Current selected user (news_study_user):', currentUserLocal);
+      
+      console.log('5. Why is it not on screen?');
+      console.log('   - The app now fetches directly from Supabase (study_records table).');
+      console.log('   - Because it fetches from DB, local data is completely ignored until you press the [Migrate] button.');
+      console.log('   - If you press "로컬 기록을 DB로 옮기기" in Settings, it will upload these local records to DB, making them visible again.');
+      console.log('==============================================');
     } catch (e) {
       console.error('Failed to parse localStorage data for check:', e);
     }
