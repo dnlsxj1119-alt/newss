@@ -7,7 +7,15 @@ export const useUser = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const storedUser = localStorage.getItem(USER_KEY);
+    let storedUser = localStorage.getItem(USER_KEY);
+    if (storedUser === 'user1') {
+      storedUser = '다연';
+      localStorage.setItem(USER_KEY, storedUser);
+    } else if (storedUser === 'user2') {
+      storedUser = '예본';
+      localStorage.setItem(USER_KEY, storedUser);
+    }
+    
     if (storedUser) {
       setCurrentUser(storedUser);
     }

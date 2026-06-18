@@ -20,8 +20,15 @@ export const useRecords = () => {
 
       if (fetchError) throw fetchError;
       
-      console.log(`Fetched ${data?.length || 0} records.`);
-      setRecords(data as StudyRecord[] || []);
+      const mappedData = data?.map(record => {
+        let name = record.member_name;
+        if (name === 'user1') name = '다연';
+        if (name === 'user2') name = '예본';
+        return { ...record, member_name: name };
+      }) || [];
+      
+      console.log(`Fetched ${mappedData.length} records.`);
+      setRecords(mappedData as StudyRecord[]);
     } catch (err: any) {
       setError(err.message);
       console.error('Error fetching records:', err);

@@ -4,8 +4,8 @@ export interface Member {
 }
 
 export const MEMBERS: Member[] = [
-  { profile_id: 'user1', display_name: '다연' },
-  { profile_id: 'user2', display_name: '예본' }
+  { profile_id: '다연', display_name: '다연' },
+  { profile_id: '예본', display_name: '예본' }
 ];
 
 export interface StudyRecord {

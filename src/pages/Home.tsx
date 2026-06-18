@@ -183,52 +183,15 @@ const Home: React.FC = () => {
         <Button fullWidth onClick={() => navigate('/add')}>
           오늘 기록 추가하기
         </Button>
-      </Card>
-
-      <div style={{ padding: '0.5rem', marginBottom: '2rem' }}>
-        <div style={{ borderTop: '1px solid var(--border-color)', margin: '0 0 1rem 0', width: '100%' }} />
-        <h3 style={{ fontSize: '0.9rem', margin: '0 0 1.25rem 0', color: 'var(--text-secondary)' }}>오늘의 기록</h3>
-
-        {isLoading ? (
-          <p style={{ textAlign: 'center', color: 'var(--text-secondary)', margin: '2rem 0' }}>불러오는 중...</p>
-        ) : todayRecords.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '2rem 1rem', color: 'var(--text-secondary)' }}>
-            오늘의 첫 기록을 작성해보세요!
-          </div>
-        ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-            {todayRecords.map(record => (
-              <div key={record.id}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
-                  <span style={{ fontSize: '0.875rem', fontWeight: 700, color: 'var(--text-primary)' }}>
-                    {MEMBERS.find(m => m.profile_id === record.member_name)?.display_name || record.member_name}
-                  </span>
-                  {record.is_included === false && (
-                    <span style={{ fontSize: '0.7rem', color: 'var(--badge-text)', background: 'var(--badge-bg)', border: '1px solid var(--badge-border)', padding: '0.1rem 0.3rem', borderRadius: '4px' }}>
-                      완료율 제외됨
-                    </span>
-                  )}
-                </div>
-                <div style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
-                  {record.headlines_text ? (
-                    record.headlines_text.split('\n').filter(Boolean).map((line: string, idx: number) => (
-                      <div key={idx} style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.25rem' }}>
-                        <span style={{ color: 'var(--text-tertiary)' }}>•</span>
-                        <span>{line.replace(/^(\(\d+\)|\[\d+\]|\{\d+\}|\d+\.|\d+\))\s*/, '').trim()}</span>
-                      </div>
-                    ))
-                  ) : (
-                    <div style={{ display: 'flex', gap: '0.5rem' }}>
-                      <span style={{ color: 'var(--text-tertiary)' }}>•</span>
-                      <span>추출된 제목이 없습니다.</span>
-                    </div>
-                  )}
-                </div>
-              </div>
-            ))}
+        
+        {!isLoading && todayRecords.length > 0 && (
+          <div style={{ marginTop: '1rem' }}>
+            <Button variant="outline" fullWidth onClick={() => navigate('/list')}>
+              오늘 기록 보기
+            </Button>
           </div>
         )}
-      </div>
+      </Card>
     </div>
   );
 };
