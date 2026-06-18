@@ -125,6 +125,14 @@ const VacationModal: React.FC<VacationModalProps> = ({ vacations, onClose, onAdd
             )}
           </div>
         )}
+        
+        {!isFormOpen && (
+          <div style={{ marginTop: '1.5rem' }}>
+            <Button variant="outline" fullWidth onClick={onClose}>
+              완료
+            </Button>
+          </div>
+        )}
       </Card>
     </div>
   );
