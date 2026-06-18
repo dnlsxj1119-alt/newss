@@ -6,14 +6,13 @@ import { Card } from '../components/ui/Card';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isWeekend, subDays } from 'date-fns';
 import { ko } from 'date-fns/locale';
 import { supabase } from '../lib/supabase';
-import { useSettings } from '../hooks/useSettings';
+import { MEMBERS } from '../types';
 import { useVacations } from '../hooks/useVacations';
 import { Flame } from 'lucide-react';
 
 const Home: React.FC = () => {
   const { currentUser } = useUser();
   const navigate = useNavigate();
-  const { members } = useSettings();
   const { vacations } = useVacations();
   const today = new Date();
   const todayStr = format(today, 'yyyy-MM-dd');
@@ -80,14 +79,14 @@ const Home: React.FC = () => {
 
   const memberStatus = useMemo(() => {
     const status: Record<string, boolean> = {};
-    members.forEach(m => status[m.profile_id] = false);
+    MEMBERS.forEach(m => status[m.profile_id] = false);
     todayRecords.forEach(r => {
       if (r.is_included !== false) {
         status[r.member_name] = true;
       }
     });
     return status;
-  }, [members, todayRecords]);
+  }, [MEMBERS, todayRecords]);
 
   // Streak logic
   const streak = useMemo(() => {
@@ -138,7 +137,7 @@ const Home: React.FC = () => {
             {format(today, 'yyyy년 M월 d일 (EEEE)', { locale: ko })}
           </p>
           <h1 style={{ fontSize: '1.75rem', margin: 0 }}>
-            환영합니다, <span className="gradient-text">{members.find(m => m.profile_id === currentUser)?.display_name || currentUser}</span>님!
+            환영합니다, <span className="gradient-text">{MEMBERS.find(m => m.profile_id === currentUser)?.display_name || currentUser}</span>님!
           </h1>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'var(--badge-bg)', padding: '0.4rem 0.8rem', borderRadius: 'var(--radius-full)', border: '1px solid var(--badge-border)', color: 'var(--badge-text)' }}>
@@ -167,7 +166,7 @@ const Home: React.FC = () => {
           </div>
         ) : (
           <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '1.5rem' }}>
-            {members.map(member => {
+            {MEMBERS.map(member => {
               const isDone = memberStatus[member.profile_id];
               return (
                 <div key={member.profile_id} style={{ flex: 1, textAlign: 'center', padding: '0.75rem', background: 'var(--bg-secondary)', borderRadius: 'var(--radius-md)', border: isDone ? '1px solid var(--success)' : '1px solid transparent' }}>
@@ -202,7 +201,7 @@ const Home: React.FC = () => {
               <div key={record.id}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
                   <span style={{ fontSize: '0.875rem', fontWeight: 700, color: 'var(--text-primary)' }}>
-                    {members.find(m => m.profile_id === record.member_name)?.display_name || record.member_name}
+                    {MEMBERS.find(m => m.profile_id === record.member_name)?.display_name || record.member_name}
                   </span>
                   {record.is_included === false && (
                     <span style={{ fontSize: '0.7rem', color: 'var(--badge-text)', background: 'var(--badge-bg)', border: '1px solid var(--badge-border)', padding: '0.1rem 0.3rem', borderRadius: '4px' }}>

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useRecords } from '../hooks/useRecords';
-import { useSettings } from '../hooks/useSettings';
+import { MEMBERS } from '../types';
 import { useUser } from '../hooks/useUser';
 import { Card } from '../components/ui/Card';
 import { Input } from '../components/ui/Input';
@@ -13,7 +13,6 @@ const RecordList: React.FC = () => {
   const navigate = useNavigate();
   const { currentUser } = useUser();
   const { records, fetchRecords, isLoading, deleteRecord } = useRecords();
-  const { members } = useSettings();
 
   const [searchTerm, setSearchTerm] = useState('');
   const [filterMember, setFilterMember] = useState('');
@@ -70,7 +69,7 @@ const RecordList: React.FC = () => {
           style={{ padding: '0.5rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-color)', background: 'var(--bg-primary)', color: 'var(--text-primary)' }}
         >
           <option value="">전체 작성자</option>
-          {members.map(m => (
+          {MEMBERS.map(m => (
             <option key={m.profile_id} value={m.profile_id}>{m.display_name}</option>
           ))}
         </select>
@@ -100,7 +99,7 @@ const RecordList: React.FC = () => {
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                     <span style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-primary)' }}>
-                      {members.find(m => m.profile_id === record.member_name)?.display_name || record.member_name}
+                      {MEMBERS.find(m => m.profile_id === record.member_name)?.display_name || record.member_name}
                     </span>
                     <span style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', fontWeight: 500 }}>
                       {format(parseISO(record.date), 'yyyy년 M월 d일', { locale: ko })}

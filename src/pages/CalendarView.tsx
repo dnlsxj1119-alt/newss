@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useRecords } from '../hooks/useRecords';
 import { useUser } from '../hooks/useUser';
-import { useSettings } from '../hooks/useSettings';
+import { MEMBERS } from '../types';
 import { useVacations } from '../hooks/useVacations';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
@@ -19,7 +19,6 @@ const CalendarView: React.FC = () => {
   const navigate = useNavigate();
   const { currentUser } = useUser();
   const { records, fetchRecords, deleteRecord } = useRecords();
-  const { members } = useSettings();
   const { vacations, fetchVacations, addVacation, updateVacation, deleteVacation } = useVacations();
   
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -82,7 +81,7 @@ const CalendarView: React.FC = () => {
   // Compute Completion Rates for displayed month
   const { completionStats } = useMemo(() => {
     const stats: Record<string, number> = {};
-    members.forEach(m => stats[m.profile_id] = 0);
+    MEMBERS.forEach(m => stats[m.profile_id] = 0);
     let overallCount = 0;
 
     const days = eachDayOfInterval({ start: monthStart, end: monthEnd });
@@ -97,7 +96,7 @@ const CalendarView: React.FC = () => {
       const validRecords = dayRecords.filter(r => r.is_included !== false);
       
       let allMembersWrote = true;
-      members.forEach(m => {
+      MEMBERS.forEach(m => {
         if (validRecords.some(r => r.member_name === m.profile_id)) {
           stats[m.profile_id]++;
         } else {
@@ -105,13 +104,13 @@ const CalendarView: React.FC = () => {
         }
       });
       
-      if (allMembersWrote && members.length > 0) {
+      if (allMembersWrote && MEMBERS.length > 0) {
         overallCount++;
       }
     });
 
     return { completionStats: { memberStats: stats, overallCount } };
-  }, [monthStart, monthEnd, recordsByDate, members]);
+  }, [monthStart, monthEnd, recordsByDate, MEMBERS]);
 
 
 
@@ -148,8 +147,8 @@ const CalendarView: React.FC = () => {
         const isVacation = vacations.some(v => dateStr >= v.start_date && dateStr <= v.end_date);
         const isSelected = selectedDateStr === dateStr;
 
-        let wroteA = members[0] && validRecords.some(r => r.member_name === members[0].profile_id);
-        let wroteB = members[1] && validRecords.some(r => r.member_name === members[1].profile_id);
+        let wroteA = MEMBERS[0] && validRecords.some(r => r.member_name === MEMBERS[0].profile_id);
+        let wroteB = MEMBERS[1] && validRecords.some(r => r.member_name === MEMBERS[1].profile_id);
 
         const baseBg = isVacation 
           ? 'repeating-linear-gradient(45deg, transparent, transparent 5px, rgba(148, 163, 184, 0.1) 5px, rgba(148, 163, 184, 0.1) 10px)'
@@ -213,7 +212,7 @@ const CalendarView: React.FC = () => {
         <h2 style={{ fontSize: '0.9rem', margin: '0 0 0.75rem 0', color: 'var(--text-secondary)' }}>이번 달 스터디 완료율</h2>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
           
-          {members.map(m => {
+          {MEMBERS.map(m => {
             const count = completionStats.memberStats[m.profile_id] || 0;
             const rate = Math.min(Math.round((count / Math.max(activeWeekdaysInMonth, 1)) * 100), 100);
             return (
@@ -272,8 +271,8 @@ const CalendarView: React.FC = () => {
         
         {/* 범례 */}
         <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', marginTop: '1.5rem', fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
-          {members[0] && <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}><span style={{ color: 'var(--primary-color)' }}>●</span> <span>{members[0].display_name} 작성</span></div>}
-          {members[1] && <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}><span style={{ color: 'var(--primary-color)' }}>○</span> <span>{members[1].display_name} 작성</span></div>}
+          {MEMBERS[0] && <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}><span style={{ color: 'var(--primary-color)' }}>●</span> <span>{MEMBERS[0].display_name} 작성</span></div>}
+          {MEMBERS[1] && <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}><span style={{ color: 'var(--primary-color)' }}>○</span> <span>{MEMBERS[1].display_name} 작성</span></div>}
         </div>
       </Card>
 
@@ -303,7 +302,7 @@ const CalendarView: React.FC = () => {
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                       <span style={{ fontSize: '0.875rem', fontWeight: 700, color: 'var(--text-primary)' }}>
-                        {members.find(m => m.profile_id === record.member_name)?.display_name || record.member_name}
+                        {MEMBERS.find(m => m.profile_id === record.member_name)?.display_name || record.member_name}
                       </span>
                       {record.is_included === false && (
                         <span style={{ fontSize: '0.7rem', color: 'var(--badge-text)', background: 'var(--badge-bg)', border: '1px solid var(--badge-border)', padding: '0.1rem 0.3rem', borderRadius: '4px' }}>

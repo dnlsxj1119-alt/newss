@@ -3,6 +3,11 @@ export interface Member {
   display_name: string;
 }
 
+export const MEMBERS: Member[] = [
+  { profile_id: 'user1', display_name: '다연' },
+  { profile_id: 'user2', display_name: '예본' }
+];
+
 export interface StudyRecord {
   id: string;
   date: string; // YYYY-MM-DD

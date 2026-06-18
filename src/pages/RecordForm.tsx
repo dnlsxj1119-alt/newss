@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useUser } from '../hooks/useUser';
-import { useSettings } from '../hooks/useSettings';
+import { MEMBERS } from '../types';
 import { useRecords } from '../hooks/useRecords';
 import { Input } from '../components/ui/Input';
 import { Button } from '../components/ui/Button';
@@ -12,8 +12,7 @@ const RecordForm: React.FC = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { currentUser } = useUser();
-  const { members } = useSettings();
-  const { addRecord, updateRecord, records, fetchRecords } = useRecords();
+  const { records, fetchRecords, addRecord, updateRecord } = useRecords();
 
   const [date, setDate] = useState(format(new Date(), 'yyyy-MM-dd'));
   const [rawText, setRawText] = useState('');
@@ -167,7 +166,7 @@ const RecordForm: React.FC = () => {
         
         {/* Author display moved to header */}
         <div style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--badge-text)', background: 'var(--badge-bg)', border: '1px solid var(--badge-border)', padding: '0.3rem 0.75rem', borderRadius: 'var(--radius-full)' }}>
-          {members.find(m => m.profile_id === currentUser)?.display_name || currentUser}
+          {MEMBERS.find(m => m.profile_id === currentUser)?.display_name || currentUser}
         </div>
       </header>
 

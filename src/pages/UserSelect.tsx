@@ -1,47 +1,13 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useUser } from '../hooks/useUser';
-import { useSettings } from '../hooks/useSettings';
+import { MEMBERS } from '../types';
 import { Button } from '../components/ui/Button';
-import { Input } from '../components/ui/Input';
 
 const UserSelect: React.FC = () => {
   const { login } = useUser();
-  const { members, updateSetting } = useSettings();
   
-  const [isEditing, setIsEditing] = useState(false);
-  const [editMembers, setEditMembers] = useState(members.map(m => m.display_name));
-  const [isSaving, setIsSaving] = useState(false);
-
   const handleLogin = (profileId: string) => {
     login(profileId);
-  };
-
-  const handleMemberChange = (index: number, val: string) => {
-    const newMems = [...editMembers];
-    newMems[index] = val;
-    setEditMembers(newMems);
-  };
-
-  const saveMembers = async () => {
-    if (editMembers.some(m => !m.trim())) {
-      alert('이름을 비울 수 없습니다.');
-      return;
-    }
-    setIsSaving(true);
-    
-    const updatedMembers = members.map((m, i) => ({
-      ...m,
-      display_name: editMembers[i]
-    }));
-    
-    const result = await updateSetting('members', updatedMembers);
-    setIsSaving(false);
-    
-    if (result.success) {
-      setIsEditing(false);
-    } else {
-      alert(`이름 저장 중 오류가 발생했습니다: ${result.error}`);
-    }
   };
 
   return (
@@ -63,65 +29,24 @@ const UserSelect: React.FC = () => {
       </div>
 
       <div style={{ width: '100%', maxWidth: '300px', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-        {isEditing ? (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', background: 'var(--bg-secondary)', padding: '1.5rem', borderRadius: 'var(--radius-lg)' }}>
-            <h3 style={{ margin: '0 0 0.5rem 0', fontSize: '1rem', color: 'var(--text-primary)', textAlign: 'center' }}>사용자 이름 수정</h3>
-            <Input 
-              value={editMembers[0] || ''}
-              onChange={(e) => handleMemberChange(0, e.target.value)}
-              placeholder="첫 번째 사용자"
-            />
-            <Input 
-              value={editMembers[1] || ''}
-              onChange={(e) => handleMemberChange(1, e.target.value)}
-              placeholder="두 번째 사용자"
-            />
-            <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem' }}>
-              <Button variant="outline" fullWidth onClick={() => { setIsEditing(false); setEditMembers(members.map(m => m.display_name)); }}>
-                취소
-              </Button>
-              <Button variant="primary" fullWidth onClick={saveMembers} disabled={isSaving}>
-                {isSaving ? '저장중' : '저장'}
-              </Button>
-            </div>
-          </div>
-        ) : (
-          <>
-            {members.map(member => (
-              <Button 
-                key={member.profile_id}
-                size="lg" 
-                variant="secondary"
-                onClick={() => handleLogin(member.profile_id)}
-                style={{ 
-                  height: '4rem', 
-                  fontSize: '1.125rem', 
-                  fontWeight: 600,
-                  display: 'flex',
-                  justifyContent: 'center',
-                  alignItems: 'center'
-                }}
-              >
-                {member.display_name}
-              </Button>
-            ))}
-            
-            <button 
-              onClick={() => { setIsEditing(true); setEditMembers(members.map(m => m.display_name)); }}
-              style={{
-                marginTop: '1.5rem',
-                background: 'none',
-                border: 'none',
-                color: 'var(--text-tertiary)',
-                fontSize: '0.875rem',
-                textDecoration: 'underline',
-                cursor: 'pointer'
-              }}
-            >
-              사용자 이름 변경하기
-            </button>
-          </>
-        )}
+        {MEMBERS.map(member => (
+          <Button 
+            key={member.profile_id}
+            size="lg" 
+            variant="secondary"
+            onClick={() => handleLogin(member.profile_id)}
+            style={{ 
+              height: '4rem', 
+              fontSize: '1.125rem', 
+              fontWeight: 600,
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center'
+            }}
+          >
+            {member.display_name}
+          </Button>
+        ))}
       </div>
     </div>
   );
