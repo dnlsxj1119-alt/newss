@@ -186,7 +186,7 @@ const Home: React.FC = () => {
         
         {!isLoading && todayRecords.length > 0 && (
           <div style={{ marginTop: '1rem' }}>
-            <Button variant="outline" fullWidth onClick={() => navigate('/list')}>
+            <Button variant="outline" fullWidth onClick={() => navigate('/records')}>
               오늘 기록 보기
             </Button>
           </div>

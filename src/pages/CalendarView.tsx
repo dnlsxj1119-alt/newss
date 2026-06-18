@@ -19,6 +19,7 @@ const CalendarView: React.FC = () => {
   
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDateStr, setSelectedDateStr] = useState<string | null>(null);
+  const [expandedRecordId, setExpandedRecordId] = useState<string | null>(null);
   const [isVacationModalOpen, setIsVacationModalOpen] = useState(false);
 
   useEffect(() => {
@@ -268,136 +269,68 @@ const CalendarView: React.FC = () => {
         <div style={{ padding: '0.5rem', marginBottom: '4rem' }}>
           <div style={{ borderTop: '1px solid var(--border-color)', margin: '1.5rem 0 1rem 0', width: '100%' }} />
           <h3 style={{ fontSize: '1rem', margin: '0 0 1.25rem 0', color: 'var(--text-primary)' }}>
-            {format(new Date(selectedDateStr), 'M월 d일', { locale: ko })} 기록 상세
+            {format(new Date(selectedDateStr), 'M월 d일', { locale: ko })} 기록
           </h3>
           
           {(recordsByDate[selectedDateStr] || []).length === 0 ? (
             <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', textAlign: 'center', padding: '2rem 0' }}>작성된 기록이 없습니다.</p>
           ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-              {MEMBERS.map(member => {
-                const userRecords = (recordsByDate[selectedDateStr] || []).filter(r => r.member_name === member.profile_id);
-                if (userRecords.length === 0) return null;
-
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              {(recordsByDate[selectedDateStr] || []).map(record => {
+                const isExpanded = expandedRecordId === record.id;
+                
                 return (
-                  <div key={member.profile_id}>
-                    <div style={{ display: 'inline-block', background: 'var(--bg-secondary)', padding: '0.3rem 0.8rem', borderRadius: 'var(--radius-full)', fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '1rem' }}>
-                      {member.display_name} 작성
+                  <Card 
+                    key={record.id} 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setExpandedRecordId(isExpanded ? null : record.id);
+                    }}
+                    style={{ cursor: 'pointer', padding: '1.25rem' }}
+                  >
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                        <span style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-primary)' }}>
+                          {MEMBERS.find(m => m.profile_id === record.member_name)?.display_name || record.member_name}
+                        </span>
+                        {record.is_included === false && (
+                          <span style={{ fontSize: '0.7rem', background: 'var(--badge-bg)', color: 'var(--badge-text)', padding: '0.1rem 0.4rem', borderRadius: '4px', border: '1px solid var(--badge-border)' }}>
+                            완료율 제외
+                          </span>
+                        )}
+                      </div>
                     </div>
                     
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                      {userRecords.map(record => {
-                        // Parse rawText to extract What/Why/How
-                        const lines = (record.raw_text || '').split('\n');
-                        const markerRegex = /^(?:\(\d+\)|\[\d+\]|\{\d+\}|\d+\.\s+|\d+\)\s+)\s*(.+)/;
-                        
-                        const articles: { title: string, what: string[], why: string[], how: string[], memo: string[], other: string[] }[] = [];
-                        let currentArticle = { title: '기록 내용', what: [] as string[], why: [] as string[], how: [] as string[], memo: [] as string[], other: [] as string[] };
-                        let currentSection = 'other';
-                        
-                        for (const line of lines) {
-                          const trimmed = line.trim();
-                          if (!trimmed) continue;
-                          
-                          const match = markerRegex.exec(trimmed);
-                          if (match) {
-                            if (currentArticle.other.length > 0 || currentArticle.what.length > 0 || currentArticle.why.length > 0) {
-                              articles.push(currentArticle);
-                            }
-                            currentArticle = { title: match[1].trim(), what: [], why: [], how: [], memo: [], other: [] };
-                            currentSection = 'other';
-                            continue;
-                          }
-                          
-                          const lower = trimmed.toLowerCase();
-                          if (lower.match(/^[-*\s]*(what)(:|\s|$)/)) {
-                            currentSection = 'what';
-                            currentArticle.what.push(trimmed.replace(/^[-*\s]*(what|What|WHAT)[^:]*:?\s*/, ''));
-                          } else if (lower.match(/^[-*\s]*(why)(:|\s|$)/)) {
-                            currentSection = 'why';
-                            currentArticle.why.push(trimmed.replace(/^[-*\s]*(why|Why|WHY)[^:]*:?\s*/, ''));
-                          } else if (lower.match(/^[-*\s]*(how)(:|\s|$)/)) {
-                            currentSection = 'how';
-                            currentArticle.how.push(trimmed.replace(/^[-*\s]*(how|How|HOW)[^:]*:?\s*/, ''));
-                          } else if (lower.match(/^[-*\s]*메모(:|\s|$)/)) {
-                            currentSection = 'memo';
-                            currentArticle.memo.push(trimmed.replace(/^[-*\s]*메모[^:]*:?\s*/, ''));
-                          } else {
-                            if (currentSection === 'what') currentArticle.what.push(trimmed);
-                            else if (currentSection === 'why') currentArticle.why.push(trimmed);
-                            else if (currentSection === 'how') currentArticle.how.push(trimmed);
-                            else if (currentSection === 'memo') currentArticle.memo.push(trimmed);
-                            else currentArticle.other.push(trimmed);
-                          }
-                        }
-                        if (currentArticle.other.length > 0 || currentArticle.what.length > 0 || currentArticle.why.length > 0) {
-                          articles.push(currentArticle);
-                        }
-
-                        // fallback title
-                        if (articles.length === 1 && articles[0].title === '기록 내용' && record.headlines_text) {
-                          const firstTitle = record.headlines_text.split('\n').filter(Boolean)[0];
-                          if (firstTitle) {
-                            articles[0].title = firstTitle.replace(/^(\(\d+\)|\[\d+\]|\{\d+\}|\d+\.|\d+\))\s*/, '').trim();
-                          }
-                        }
-
-                        return (
-                          <div key={record.id} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                            {articles.map((art, idx) => (
-                              <Card key={idx} style={{ padding: '1.25rem' }}>
-                                <h4 style={{ fontSize: '1.125rem', margin: '0 0 1rem 0', color: 'var(--primary-color)', lineHeight: 1.4 }}>
-                                  {art.title}
-                                </h4>
-                                
-                                {art.what.length > 0 && (
-                                  <div style={{ marginBottom: '0.75rem' }}>
-                                    <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>What</span>
-                                    <div style={{ fontSize: '0.95rem', color: 'var(--text-primary)', marginTop: '0.25rem', lineHeight: 1.5 }}>
-                                      {art.what.filter(Boolean).map((t, i) => <div key={i}>{t.startsWith('-') ? t : `- ${t}`}</div>)}
-                                    </div>
-                                  </div>
-                                )}
-                                
-                                {art.why.length > 0 && (
-                                  <div style={{ marginBottom: '0.75rem' }}>
-                                    <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Why</span>
-                                    <div style={{ fontSize: '0.95rem', color: 'var(--text-primary)', marginTop: '0.25rem', lineHeight: 1.5 }}>
-                                      {art.why.filter(Boolean).map((t, i) => <div key={i}>{t.startsWith('-') ? t : `- ${t}`}</div>)}
-                                    </div>
-                                  </div>
-                                )}
-                                
-                                {art.how.length > 0 && (
-                                  <div style={{ marginBottom: '0.75rem' }}>
-                                    <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>How</span>
-                                    <div style={{ fontSize: '0.95rem', color: 'var(--text-primary)', marginTop: '0.25rem', lineHeight: 1.5 }}>
-                                      {art.how.filter(Boolean).map((t, i) => <div key={i}>{t.startsWith('-') ? t : `- ${t}`}</div>)}
-                                    </div>
-                                  </div>
-                                )}
-                                
-                                {art.memo.length > 0 && (
-                                  <div style={{ marginBottom: '0.75rem', background: 'var(--bg-secondary)', padding: '0.75rem', borderRadius: 'var(--radius-sm)' }}>
-                                    <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-secondary)' }}>📝 메모</span>
-                                    <div style={{ fontSize: '0.9rem', color: 'var(--text-primary)', marginTop: '0.25rem', lineHeight: 1.5 }}>
-                                      {art.memo.filter(Boolean).map((t, i) => <div key={i}>{t.startsWith('-') ? t : `- ${t}`}</div>)}
-                                    </div>
-                                  </div>
-                                )}
-                                
-                                {art.other.length > 0 && (
-                                  <div style={{ marginTop: '0.5rem', fontSize: '0.9rem', color: 'var(--text-secondary)', lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>
-                                    {art.other.join('\n')}
-                                  </div>
-                                )}
-                              </Card>
-                            ))}
-                          </div>
-                        );
-                      })}
+                    <div style={{ marginBottom: '0.5rem' }}>
+                      <div style={{ 
+                        color: 'var(--text-primary)', 
+                        fontSize: '1rem', 
+                        lineHeight: 1.6,
+                        whiteSpace: 'pre-wrap'
+                      }}>
+                        {record.headlines_text || <span style={{ color: 'var(--text-tertiary)' }}>추출된 제목이 없습니다.</span>}
+                      </div>
                     </div>
-                  </div>
+
+                    {isExpanded && (
+                      <div style={{ marginTop: '1.5rem', paddingTop: '1.5rem', borderTop: '1px solid var(--border-color)', animation: 'fadeIn 0.2s ease-in-out' }}>
+                        <h4 style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>원문</h4>
+                        <div style={{ 
+                          fontSize: '0.95rem', 
+                          whiteSpace: 'pre-wrap', 
+                          margin: '0 0 1.5rem 0',
+                          background: 'var(--bg-primary)',
+                          padding: '1rem',
+                          borderRadius: 'var(--radius-md)',
+                          color: 'var(--text-tertiary)',
+                          maxHeight: '300px',
+                          overflowY: 'auto'
+                        }}>
+                          {record.raw_text || '원문이 없습니다.'}
+                        </div>
+                      </div>
+                    )}
+                  </Card>
                 );
               })}
             </div>
