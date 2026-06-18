@@ -60,20 +60,63 @@ const RecordForm: React.FC = () => {
       return;
     }
     
-    // 매칭 가능한 형태: (1), [1], {1}, 1., 1)
-    const regex = /(?:\(\d+\)|\[\d+\]|\{\d+\}|\d+\.|\d+\))\s*([^\n]+)/g;
-    const matches = [];
-    let match;
-    let count = 1;
-    while ((match = regex.exec(rawText)) !== null) {
-      matches.push(`(${count}) ${match[1].trim()}`);
-      count++;
+    const lines = rawText.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+    
+    // 사용자가 제외해달라고 요청한 세부 정보 키워드들
+    const exclusionKeywords = [
+      '설비 용량', '일자리 창출', 'ETF 편입', 'ADR 상장', 
+      '코스피 최고', '수혜 예상', '전망 및 효과', '규모', '확보'
+    ];
+
+    const extractedTitles: string[] = [];
+    
+    // 기사 구분 마커: 문장 맨 앞에 (1), [1], {1}, 1., 1) 등이 오고 뒤에 공백이 있는 형태
+    const markerRegex = /^(?:\(\d+\)|\[\d+\]|\{\d+\}|\d+\.\s+|\d+\)\s+)\s*(.+)/;
+
+    // 본문에 마커가 최소 1개라도 있는지 확인
+    const hasMarkers = lines.some(l => markerRegex.test(l));
+
+    if (hasMarkers) {
+      // 마커가 있는 경우: 마커가 있는 줄만 검사하여 제목으로 추출
+      for (const line of lines) {
+        const match = markerRegex.exec(line);
+        if (match) {
+          const titleCandidate = match[1].trim();
+          const isExcluded = exclusionKeywords.some(keyword => titleCandidate.includes(keyword));
+          // 영문, 숫자, 특수기호로만 이루어진 단순 수치 제외
+          const isOnlyNumbers = /^[\d\s\.,%a-zA-Z]+$/.test(titleCandidate);
+          
+          if (!isExcluded && !isOnlyNumbers) {
+            extractedTitles.push(titleCandidate);
+          }
+        }
+      }
+    } else {
+      // 마커가 전혀 없는 경우: 빈 줄(\n\n)을 기준으로 기사를 구분한다고 가정
+      const blocks = rawText.split(/\n\s*\n/).filter(b => b.trim().length > 0);
+      for (const block of blocks) {
+        const blockLines = block.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+        for (const line of blockLines) {
+          // - 나 * 등으로 시작하는 세부 항목 줄은 무시
+          if (/^[-*•]/.test(line)) continue;
+
+          const isExcluded = exclusionKeywords.some(keyword => line.includes(keyword));
+          const isOnlyNumbers = /^[\d\s\.,%a-zA-Z]+$/.test(line);
+          
+          if (!isExcluded && !isOnlyNumbers && line.length > 2) {
+            extractedTitles.push(line);
+            break; // 한 기사(블록)당 최상단의 핵심 제목 1개만 추출
+          }
+        }
+      }
     }
 
-    if (matches.length > 0) {
-      setHeadlinesText(matches.join('\n'));
+    if (extractedTitles.length > 0) {
+      // (1) 제목, (2) 제목 형태로 깔끔하게 포맷팅
+      const formatted = extractedTitles.map((t, i) => `(${i + 1}) ${t}`).join('\n');
+      setHeadlinesText(formatted);
     } else {
-      alert('원문에서 (1), (2) 형태의 제목을 찾지 못했습니다.');
+      alert('제목으로 추출할 만한 핵심 문장을 찾지 못했습니다.');
     }
   };
 
