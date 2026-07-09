@@ -39,45 +39,54 @@ GEMINI_API_KEY=여기에_Gemini_API_키
    - Gemini API 키는 https://aistudio.google.com/apikey 에서 신용카드 등록 없이 무료로 발급받을 수 있습니다. (요청 속도 제한이 있지만 개인 사용량에는 충분합니다.)
    - Supabase 관련 환경변수(`VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`)는 기존 `.env.local`에 이미 있는 값을 그대로 사용합니다.
 
-3. 의존성 설치 및 실행:
+3. 로컬 전용 시크릿 파일 `.dev.vars`를 프로젝트 루트에 만들고 같은 값을 넣습니다 (Cloudflare Pages Functions의 로컬 개발 방식 — `.env`가 아니라 이 파일을 읽습니다):
+
+```
+GEMINI_API_KEY=여기에_Gemini_API_키
+```
+
+4. 의존성 설치 및 실행:
 
 ```
 npm install
 npm run dev
 ```
 
-   `npm run dev`는 Vite 개발 서버(프론트엔드)와 `server.js`(AI API 로컬 백엔드)를 동시에 띄웁니다. 프론트엔드의 `/api/*` 요청은 `vite.config.ts`의 프록시 설정을 통해 `http://localhost:3001`의 로컬 백엔드로 전달됩니다.
+   `npm run dev`는 (1) `vite build --watch`로 프론트엔드를 계속 재빌드하고 (2) `wrangler pages dev dist`로 빌드 결과물과 `functions/` 폴더(API)를 함께 서빙합니다. **http://localhost:8788** 로 접속하세요 (Vite의 5173이 아닙니다 — API까지 포함해서 실제 배포 환경과 동일하게 도는 포트입니다).
 
-## 배포 (Vercel)
+## 배포 (Cloudflare Pages)
 
-- `api/` 폴더의 파일들은 Vercel이 자동으로 서버리스 함수로 인식합니다(별도 설정 불필요).
-- Vercel 프로젝트 설정 → Environment Variables에 `GEMINI_API_KEY`를 등록하세요. (`VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`는 이미 등록되어 있어야 합니다.)
+이 프로젝트는 **Cloudflare Pages**에 배포됩니다 (Vercel 아님). `functions/api/*.js`가 Cloudflare Pages Functions 규격(Web 표준 `Request`/`Response`, `onRequestPost`/`onRequestOptions` export)으로 작성되어 있어 별도 설정 없이 인식됩니다.
+
+- Cloudflare Pages 프로젝트 설정 확인: Build command `npm run build`, Build output directory `dist`, Root directory는 이 저장소 루트(= `functions/`가 있는 위치)여야 합니다.
+- **Settings → Environment variables**에 `GEMINI_API_KEY`를 Production/Preview 둘 다 등록하세요. (`VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`는 빌드 시점에 프론트엔드에 번들되므로 여기에도 등록되어 있어야 합니다.)
+- `git push`하면 Cloudflare Pages가 연결된 브랜치를 자동으로 다시 빌드/배포합니다. 수동 배포가 필요하면 `npm run deploy` (`wrangler pages deploy dist`)를 사용하세요.
 
 ## 구조
 
 ```
-api/
-  _lib/
-    gemini.js            # Gemini 클라이언트 + 검색 그라운딩/구조화 출력(responseSchema) 호출 헬퍼
-    handler.js            # CORS + 에러 처리 공통 래퍼
-    prompts.js            # News Scout / Analyzer / Trend Connection / Critical Thinking / 기사분석 프롬프트
-  news-scout.js           # /study 전용: POST { keywords } -> { articles }
-  news-analyzer.js        # /study 전용: POST { title, link, press, date } -> 분석 결과
-  trend-connection.js     # /study 전용: POST { article, analysis, history } -> 지식 연결 결과
-  critical-thinking.js    # /study, /ai-article 공용: POST { article, analysis, opinion } -> 반대 관점/질문
-  article-analyzer.js     # /ai-article 전용: POST { mode: 'url'|'text', url|content } -> 분석 결과
-server.js                  # 로컬 개발용 Express 서버 (위 api/* 핸들러를 그대로 마운트)
+functions/
+  api/
+    _lib/
+      gemini.js            # fetch로 Gemini REST API 직접 호출 (Workers 런타임엔 Node SDK 사용 불가)
+      handler.js             # CORS + JSON 파싱 + 에러 처리 공통 래퍼 (Request/Response 기반)
+      prompts.js             # News Scout / Analyzer / Trend Connection / Critical Thinking / 기사분석 프롬프트
+    news-scout.js            # /study 전용: POST { keywords } -> { articles }
+    news-analyzer.js         # /study 전용: POST { title, link, press, date } -> 분석 결과
+    trend-connection.js      # /study 전용: POST { article, analysis, history } -> 지식 연결 결과
+    critical-thinking.js     # /study, /ai-article 공용: POST { article, analysis, opinion } -> 반대 관점/질문
+    article-analyzer.js      # /ai-article 전용: POST { mode: 'url'|'text', url|content } -> 분석 결과
 supabase/
-  ai_study_migration.sql   # study_records 테이블 확장 SQL (최초 1회 실행, 두 도구가 공유)
+  ai_study_migration.sql     # study_records 테이블 확장 SQL (최초 1회 실행, 두 도구가 공유)
 src/
   lib/
-    apiClient.ts           # 공용 fetch 래퍼 (postJson)
-    aiStudy.ts              # /study 전용 API 클라이언트
-    aiArticleAnalysis.ts    # /ai-article 전용 API 클라이언트 (critical-thinking만 재사용)
+    apiClient.ts             # 공용 fetch 래퍼 (postJson)
+    aiStudy.ts                # /study 전용 API 클라이언트
+    aiArticleAnalysis.ts      # /ai-article 전용 API 클라이언트 (critical-thinking만 재사용)
   components/ArticleCard.tsx, ConfirmModal.tsx
   pages/
-    AIStudy.tsx             # 7단계 워크플로우 페이지 (/study)
-    AIArticleAnalysis.tsx   # 독립 기사분석 페이지 (/ai-article, '다연' 전용)
+    AIStudy.tsx               # 7단계 워크플로우 페이지 (/study)
+    AIArticleAnalysis.tsx     # 독립 기사분석 페이지 (/ai-article, '다연' 전용)
 ```
 
 ## 참고 / 한계

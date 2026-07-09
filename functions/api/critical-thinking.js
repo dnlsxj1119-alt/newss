@@ -1,9 +1,9 @@
-import { withCors } from './_lib/handler.js';
+import { definePostHandler, onRequestOptions as sharedOptions } from './_lib/handler.js';
 import { generateWithSchema, parseJsonLoose } from './_lib/gemini.js';
 import { CRITICAL_THINKING_SYSTEM_PROMPT, CRITICAL_THINKING_SCHEMA } from './_lib/prompts.js';
 
-export default withCors(async (req, res) => {
-  const { article, analysis, opinion } = req.body || {};
+export const onRequestPost = definePostHandler(async ({ body, env }) => {
+  const { article, analysis, opinion } = body || {};
   if (!article?.title || !opinion?.trim()) {
     throw new Error('기사 정보와 사용자 의견이 필요합니다.');
   }
@@ -17,10 +17,13 @@ export default withCors(async (req, res) => {
 ${opinion.trim()}`;
 
   const text = await generateWithSchema({
+    env,
     systemInstruction: CRITICAL_THINKING_SYSTEM_PROMPT,
     prompt,
     responseSchema: CRITICAL_THINKING_SCHEMA,
   });
 
-  res.status(200).json(parseJsonLoose(text));
+  return parseJsonLoose(text);
 });
+
+export const onRequestOptions = sharedOptions;

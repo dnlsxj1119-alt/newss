@@ -1,9 +1,9 @@
-import { withCors } from './_lib/handler.js';
+import { definePostHandler, onRequestOptions as sharedOptions } from './_lib/handler.js';
 import { generateWithSchema, parseJsonLoose } from './_lib/gemini.js';
 import { TREND_CONNECTION_SYSTEM_PROMPT, TREND_CONNECTION_SCHEMA } from './_lib/prompts.js';
 
-export default withCors(async (req, res) => {
-  const { article, analysis, history } = req.body || {};
+export const onRequestPost = definePostHandler(async ({ body, env }) => {
+  const { article, analysis, history } = body || {};
   if (!article?.title || !analysis) {
     throw new Error('기사와 분석 결과가 필요합니다.');
   }
@@ -25,10 +25,13 @@ export default withCors(async (req, res) => {
 ${historyText}`;
 
   const text = await generateWithSchema({
+    env,
     systemInstruction: TREND_CONNECTION_SYSTEM_PROMPT,
     prompt,
     responseSchema: TREND_CONNECTION_SCHEMA,
   });
 
-  res.status(200).json(parseJsonLoose(text));
+  return parseJsonLoose(text);
 });
+
+export const onRequestOptions = sharedOptions;
