@@ -10,6 +10,9 @@ import RecordForm from './pages/RecordForm';
 import RecordList from './pages/RecordList';
 import CalendarPage from './pages/CalendarPage';
 import Settings from './pages/Settings';
+import AIStudy from './pages/AIStudy';
+import AIArticleAnalysis from './pages/AIArticleAnalysis';
+import { AI_ARTICLE_ANALYSIS_ALLOWED_USER } from './types';
 
 const App: React.FC = () => {
   const { currentUser, isLoading } = useUser();
@@ -60,6 +63,11 @@ const App: React.FC = () => {
           <Route index element={<Home />} />
           <Route path="add" element={<RecordForm />} />
           <Route path="edit/:id" element={<RecordForm />} />
+          <Route path="study" element={<AIStudy />} />
+          <Route
+            path="ai-article"
+            element={currentUser === AI_ARTICLE_ANALYSIS_ALLOWED_USER ? <AIArticleAnalysis /> : <Navigate to="/" replace />}
+          />
           <Route path="calendar" element={<CalendarPage />} />
           <Route path="records" element={<RecordList />} />
           <Route path="settings" element={<Settings />} />

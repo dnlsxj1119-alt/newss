@@ -1,73 +1,89 @@
-# React + TypeScript + Vite
+# 산업스터디 (뉴스 스터디 트래커 + AI 산업스터디 + AI 기사분석)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React + Vite + Supabase 기반의 산업 뉴스 스터디 기록 앱. 기존 "직접 기록" 플로우에 더해,
+Claude Code 없이도 웹에서 바로 도는 두 가지 AI 도구를 추가했습니다.
 
-Currently, two official plugins are available:
+- **AI 산업스터디** (`/study`, 하단 탭 ✨): News Scout → News Analyzer → Trend Connection → Critical Thinking 7단계 워크플로우. 저장 시 기존 `study_records`에 반영되어 목록/달력/완료율에 자동으로 나타납니다.
+- **AI 기사분석** (`/ai-article`, 하단 탭 📄, **'다연' 계정에만 노출**): URL 또는 본문을 붙여넣어 분석 → 내 의견 → 반대 관점까지 확인하는 독립 도구. 자동 저장되지 않으며, `[산업스터디에 저장]`을 누르고 확인 모달에서 한 번 더 확인해야만 기록으로 남습니다.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+두 도구 모두 Google Gemini API를 호출합니다. Gemini는 신용카드 등록 없이 무료 티어로 발급받을 수 있고, 무료 한도 안에서 Google 검색 그라운딩(실시간 웹 검색)도 함께 씁니다.
 
-## React Compiler
+## AI 산업스터디 사용법
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+1. 하단 네비게이션의 **AI스터디**(✨) 또는 홈 화면의 "AI로 기사 찾아 스터디하기" 버튼으로 이동합니다.
+2. **오늘 기사 찾기**: 관심 산업/키워드를 입력하고(비워두면 반도체/AI/배터리 등에서 자동 선택) 버튼을 누르면 최신 기사 3~5개가 카드로 나옵니다.
+3. 카드 중 하나를 선택하고 **분석하기**를 누르면 5줄 요약 / 왜 중요한가 / 핵심 키워드 / 관련 기업 / 관련 기술이 나옵니다.
+4. **지식 연결하기**를 누르면 과거에 저장한 AI 산업스터디 기록과 연결되는 지점, 밸류체인/산업 흐름, 추가로 공부하면 좋은 개념을 보여줍니다.
+5. **내 의견**을 적고 **다른 관점 보기**를 누르면 반대 관점 / 놓친 요소 / 생각해볼 질문이 생성됩니다.
+6. **저장하기**를 누르면 모든 결과가 Supabase의 `study_records` 테이블에 저장되고, 기존 목록/달력/완료율 화면에 그대로 반영됩니다.
 
-## Expanding the ESLint configuration
+## AI 기사분석 사용법 ('다연' 전용)
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+1. 하단 네비게이션의 **AI분석**으로 이동합니다 (다른 계정에는 이 탭이 보이지 않고, 주소로 직접 접근해도 홈으로 튕깁니다).
+2. **URL 입력** 또는 **본문 직접 입력** 중 하나를 선택해 기사를 넣고 **분석하기**를 누릅니다.
+   - URL에서 충분한 내용을 확인하지 못하면(로그인/유료화벽 등) 안내 배너가 뜨고, **본문 직접 입력하기**로 바로 전환할 수 있습니다.
+3. 5줄 요약 / 왜 중요한가 / 핵심 키워드 / 관련 기업 / 관련 기술을 확인합니다.
+4. **내 의견**을 적고 **다른 관점 보기**를 누르면 반대 관점 / 놓친 요소 / 생각해볼 질문이 나옵니다.
+5. **복사하기**로 전체 결과(요약+내 의견+반대 관점 포함)를 마크다운으로 클립보드에 복사할 수 있습니다.
+6. **산업스터디에 저장**은 선택 사항입니다 — 눌러도 확인 모달이 뜨고, 거기서 한 번 더 확인해야 저장됩니다. 저장 전까지는 어떤 데이터도 DB에 쓰이지 않습니다.
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## 처음 실행하기 (최초 1회)
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+1. Supabase 대시보드 → SQL Editor에서 `supabase/ai_study_migration.sql`을 실행합니다. (기존 테이블에 nullable 컬럼만 추가하므로 기존 데이터에는 영향이 없습니다.)
+2. 프로젝트 루트에 `.env` 파일을 만들고 아래 환경변수를 채웁니다. (`.env`는 `.gitignore`에 포함되어 커밋되지 않습니다.)
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```
+GEMINI_API_KEY=여기에_Gemini_API_키
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+   - Gemini API 키는 https://aistudio.google.com/apikey 에서 신용카드 등록 없이 무료로 발급받을 수 있습니다. (요청 속도 제한이 있지만 개인 사용량에는 충분합니다.)
+   - Supabase 관련 환경변수(`VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`)는 기존 `.env.local`에 이미 있는 값을 그대로 사용합니다.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+3. 의존성 설치 및 실행:
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
 ```
+npm install
+npm run dev
+```
+
+   `npm run dev`는 Vite 개발 서버(프론트엔드)와 `server.js`(AI API 로컬 백엔드)를 동시에 띄웁니다. 프론트엔드의 `/api/*` 요청은 `vite.config.ts`의 프록시 설정을 통해 `http://localhost:3001`의 로컬 백엔드로 전달됩니다.
+
+## 배포 (Vercel)
+
+- `api/` 폴더의 파일들은 Vercel이 자동으로 서버리스 함수로 인식합니다(별도 설정 불필요).
+- Vercel 프로젝트 설정 → Environment Variables에 `GEMINI_API_KEY`를 등록하세요. (`VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`는 이미 등록되어 있어야 합니다.)
+
+## 구조
+
+```
+api/
+  _lib/
+    gemini.js            # Gemini 클라이언트 + 검색 그라운딩/구조화 출력(responseSchema) 호출 헬퍼
+    handler.js            # CORS + 에러 처리 공통 래퍼
+    prompts.js            # News Scout / Analyzer / Trend Connection / Critical Thinking / 기사분석 프롬프트
+  news-scout.js           # /study 전용: POST { keywords } -> { articles }
+  news-analyzer.js        # /study 전용: POST { title, link, press, date } -> 분석 결과
+  trend-connection.js     # /study 전용: POST { article, analysis, history } -> 지식 연결 결과
+  critical-thinking.js    # /study, /ai-article 공용: POST { article, analysis, opinion } -> 반대 관점/질문
+  article-analyzer.js     # /ai-article 전용: POST { mode: 'url'|'text', url|content } -> 분석 결과
+server.js                  # 로컬 개발용 Express 서버 (위 api/* 핸들러를 그대로 마운트)
+supabase/
+  ai_study_migration.sql   # study_records 테이블 확장 SQL (최초 1회 실행, 두 도구가 공유)
+src/
+  lib/
+    apiClient.ts           # 공용 fetch 래퍼 (postJson)
+    aiStudy.ts              # /study 전용 API 클라이언트
+    aiArticleAnalysis.ts    # /ai-article 전용 API 클라이언트 (critical-thinking만 재사용)
+  components/ArticleCard.tsx, ConfirmModal.tsx
+  pages/
+    AIStudy.tsx             # 7단계 워크플로우 페이지 (/study)
+    AIArticleAnalysis.tsx   # 독립 기사분석 페이지 (/ai-article, '다연' 전용)
+```
+
+## 참고 / 한계
+
+- News Scout·News Analyzer·기사분석(URL 모드)은 Gemini의 Google 검색 그라운딩 기능으로 실제 웹 검색 결과에 근거해 기사를 찾고 분석합니다. 다만 LLM 응답이므로 가끔 부정확한 정보가 섞일 수 있어 링크를 직접 확인하는 것을 권장합니다.
+- Trend Connection은 `study_records` 테이블에서 `source = 'ai_workflow'`로 저장된 과거 기록만 참고합니다. 기존 방식(직접 원문 입력)으로 작성한 기록은 연결 대상에 포함되지 않습니다.
+- AI 산업스터디 / AI 기사분석으로 저장한 기록도 `raw_text`/`headlines_text`에 요약 내용을 함께 채워 넣기 때문에 기존 목록/달력/완료율 로직을 수정하지 않고도 그대로 반영됩니다.
+- AI 기사분석은 저장하지 않는 한 어떤 데이터도 DB에 쓰지 않으며, `/study`와 완전히 분리되어 있어 서로 수정해도 영향이 없습니다.
+- Gemini 무료 티어는 요청 속도 제한(분당/일당 횟수)이 있습니다. "Resource exhausted" 류의 에러가 나면 잠시 후 다시 시도하세요.

@@ -8,7 +8,7 @@ import { ko } from 'date-fns/locale';
 import { supabase } from '../lib/supabase';
 import { MEMBERS } from '../types';
 import { useVacations } from '../hooks/useVacations';
-import { Flame } from 'lucide-react';
+import { Flame, Sparkles } from 'lucide-react';
 
 const Home: React.FC = () => {
   const { currentUser } = useUser();
@@ -183,7 +183,18 @@ const Home: React.FC = () => {
         <Button fullWidth onClick={() => navigate('/add')}>
           오늘 기록 추가하기
         </Button>
-        
+
+        <div style={{ marginTop: '0.75rem' }}>
+          <Button
+            variant="outline"
+            fullWidth
+            onClick={() => navigate('/study')}
+            style={{ borderColor: 'var(--accent-secondary)', color: 'var(--accent-secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem' }}
+          >
+            <Sparkles size={16} /> AI로 기사 찾아 스터디하기
+          </Button>
+        </div>
+
         {!isLoading && todayRecords.length > 0 && (
           <div style={{ marginTop: '1rem' }}>
             <Button variant="outline" fullWidth onClick={() => navigate('/records')}>
