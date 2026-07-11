@@ -34,7 +34,14 @@ async function callGemini(apiKey, model, systemInstruction, prompt, { tools, res
   if (!text) {
     throw new Error('Gemini 응답에 내용이 없습니다.');
   }
-  return text;
+
+  // googleSearch 그라운딩을 쓴 경우, 모델이 텍스트로 "적어낸" 링크는 지어낼 수 있지만
+  // groundingChunks에 담긴 링크는 실제로 검색이 찾아낸 출처라 신뢰할 수 있다.
+  const groundingChunks = (data.candidates?.[0]?.groundingMetadata?.groundingChunks || [])
+    .map((c) => c.web)
+    .filter((w) => w?.uri);
+
+  return { text, groundingChunks };
 }
 
 function getApiKey(env) {

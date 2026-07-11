@@ -24,7 +24,7 @@ export const onRequestPost = definePostHandler(async ({ body, env }) => {
 [이전 산업스터디 기록 목록]
 ${historyText}`;
 
-  const text = await generateWithSchema({
+  const { text } = await generateWithSchema({
     env,
     systemInstruction: TREND_CONNECTION_SYSTEM_PROMPT,
     prompt,

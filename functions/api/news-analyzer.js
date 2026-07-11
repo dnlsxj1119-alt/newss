@@ -10,7 +10,7 @@ export const onRequestPost = definePostHandler(async ({ body, env }) => {
 
   const prompt = `다음 기사를 분석해줘.\n제목: ${title}\n링크: ${link}\n언론사: ${press || '미상'}\n날짜: ${date || '미상'}`;
 
-  const text = await generateWithSearch({ env, systemInstruction: NEWS_ANALYZER_SYSTEM_PROMPT, prompt });
+  const { text } = await generateWithSearch({ env, systemInstruction: NEWS_ANALYZER_SYSTEM_PROMPT, prompt });
   return parseJsonLoose(text);
 });
 

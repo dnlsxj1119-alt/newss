@@ -16,7 +16,7 @@ export const onRequestPost = definePostHandler(async ({ body, env }) => {
       throw new Error('분석할 기사 URL이 필요합니다.');
     }
     const prompt = `다음 URL의 기사를 검색해서 분석해줘: ${url.trim()}`;
-    const text = await generateWithSearch({ env, systemInstruction: ARTICLE_ANALYZER_SEARCH_PROMPT, prompt });
+    const { text } = await generateWithSearch({ env, systemInstruction: ARTICLE_ANALYZER_SEARCH_PROMPT, prompt });
     return parseJsonLoose(text);
   }
 
@@ -25,7 +25,7 @@ export const onRequestPost = definePostHandler(async ({ body, env }) => {
       throw new Error('분석할 기사 본문이 필요합니다.');
     }
     const prompt = `다음 기사 본문을 분석해줘:\n\n${content.trim()}`;
-    const text = await generateWithSchema({
+    const { text } = await generateWithSchema({
       env,
       systemInstruction: ARTICLE_ANALYZER_TEXT_PROMPT,
       prompt,

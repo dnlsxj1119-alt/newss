@@ -16,7 +16,7 @@ export const onRequestPost = definePostHandler(async ({ body, env }) => {
 [사용자 의견]
 ${opinion.trim()}`;
 
-  const text = await generateWithSchema({
+  const { text } = await generateWithSchema({
     env,
     systemInstruction: CRITICAL_THINKING_SYSTEM_PROMPT,
     prompt,
